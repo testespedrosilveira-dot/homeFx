@@ -8,136 +8,131 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
       width: 100%;
+      height: 100%;
       background: white;
+      display: flex;
+      justify-content: center; /* centraliza horizontalmente */
+      align-items: center;    /* centraliza verticalmente */
       overflow: hidden;
     }
     #p5-holder {
-      width: 100%;
-      height: 100%;
+      width: 500px;  /* largura fixa do widget */
+      height: 350px; /* altura fixa do widget */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
   </style>
 </head>
 <body>
-<div id="p5-holder"></div>
+  <div id="p5-holder"></div>
 
-<script>
-new p5((p) => {
-  const fileNames = [
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
-  ];
+  <script>
+  new p5((p) => {
+    const fileNames = [
+      "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+      "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+      "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+      "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+      "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+      "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+      "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+      "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+    ];
 
-  const tileSize = 40;
-  const maxTiles = 300;
+    const canvasWidth = 500;
+    const canvasHeight = 350;
+    const tileSize = 40;
+    const maxTiles = 300;
 
-  let imgs = [];
-  let imgsGray = [];
-  let tiles = [];
-  let loadedCount = 0;
+    let imgs = [];
+    let imgsGray = [];
+    let tiles = [];
+    let loadedCount = 0;
 
-  function drawImageCover(img, w, h){
-    let imgRatio = img.width / img.height;
-    let boxRatio = w / h;
-    let drawW = w, drawH = h;
-    if(imgRatio > boxRatio){
-      drawH = h;
-      drawW = imgRatio * drawH;
-    } else {
-      drawW = w;
-      drawH = drawW / imgRatio;
-    }
-    p.image(img, -drawW/2, -drawH/2, drawW, drawH);
-  }
-
-  fileNames.forEach((url, idx) => {
-    p.loadImage(url, (img) => {
-      imgs[idx] = img;
-
-      let g = p.createImage(img.width, img.height);
-      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-      g.loadPixels();
-      for(let i=0; i<g.pixels.length; i+=4){
-        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
-      }
-      g.updatePixels();
-      imgsGray[idx] = g;
-
-      loadedCount++;
-      if(loadedCount === fileNames.length) generateTiles();
-    });
-  });
-
-  let canvasW, canvasH;
-
-  p.setup = () => {
-    canvasW = p.windowWidth;
-    canvasH = p.windowHeight;
-    p.createCanvas(canvasW, canvasH).parent("p5-holder");
-    generateTiles();
-  };
-
-  p.windowResized = () => {
-    canvasW = p.windowWidth;
-    canvasH = p.windowHeight;
-    p.resizeCanvas(canvasW, canvasH);
-    generateTiles();
-  };
-
-  function generateTiles(){
-    tiles = [];
-    for(let i=0; i<maxTiles; i++){
-      // evita que fiquem nos cantos
-      const px = p.random(tileSize*2, canvasW - tileSize*2);
-      const py = p.random(tileSize*2, canvasH - tileSize*2);
-      tiles.push({
-        x:px, y:py,
-        imgColor: imgs[i % imgs.length],
-        imgGray: imgsGray[i % imgsGray.length],
-        rot:0, scale:1
-      });
-    }
-  }
-
-  p.draw = () => {
-    p.background(255);
-    if(loadedCount < fileNames.length) return;
-
-    for(let t of tiles){
-      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      let isMain = false;
-
-      if(d < tileSize*2){
-        t.rot = p.lerp(t.rot, 0.1, 0.25);
-        t.scale = p.lerp(t.scale, 1.45, 0.25);
-        isMain = true;
-      } else if(d < tileSize*4){
-        t.rot = p.lerp(t.rot, 0, 0.15);
-        t.scale = p.lerp(t.scale, 0.85, 0.12);
+    function drawImageCover(img, w, h){
+      let imgRatio = img.width / img.height;
+      let boxRatio = w / h;
+      let drawW = w, drawH = h;
+      if(imgRatio > boxRatio){
+        drawH = h;
+        drawW = imgRatio * drawH;
       } else {
-        t.rot = p.lerp(t.rot, 0, 0.1);
-        t.scale = p.lerp(t.scale, 1.0, 0.1);
+        drawW = w;
+        drawH = drawW / imgRatio;
       }
-
-      p.push();
-      p.translate(t.x, t.y);
-      p.rotate(t.rot);
-      p.scale(t.scale);
-      p.imageMode(p.CENTER);
-      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
-      else drawImageCover(t.imgGray, tileSize, tileSize);
-      p.pop();
+      p.image(img, -drawW/2, -drawH/2, drawW, drawH);
     }
-  };
-});
-</script>
+
+    fileNames.forEach((url, idx) => {
+      p.loadImage(url, (img) => {
+        imgs[idx] = img;
+
+        let g = p.createImage(img.width, img.height);
+        g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+        g.loadPixels();
+        for(let i=0; i<g.pixels.length; i+=4){
+          let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
+          g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
+        }
+        g.updatePixels();
+        imgsGray[idx] = g;
+
+        loadedCount++;
+        if(loadedCount === fileNames.length) generateTiles();
+      });
+    });
+
+    p.setup = () => {
+      p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
+    };
+
+    function generateTiles(){
+      tiles = [];
+      for(let i=0; i<maxTiles; i++){
+        const px = p.random(tileSize/2, canvasWidth - tileSize/2);
+        const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+        tiles.push({
+          x:px, y:py,
+          imgColor: imgs[i % imgs.length],
+          imgGray: imgsGray[i % imgsGray.length],
+          rot:0, scale:1
+        });
+      }
+    }
+
+    p.draw = () => {
+      p.background(255);
+      if(loadedCount < fileNames.length) return;
+
+      for(let t of tiles){
+        const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+        let isMain = false;
+
+        if(d < tileSize*2){
+          t.rot = p.lerp(t.rot, 0.1, 0.25);
+          t.scale = p.lerp(t.scale, 1.45, 0.25);
+          isMain = true;
+        } else if(d < tileSize*4){
+          t.rot = p.lerp(t.rot, 0, 0.15);
+          t.scale = p.lerp(t.scale, 0.85, 0.12);
+        } else {
+          t.rot = p.lerp(t.rot, 0, 0.1);
+          t.scale = p.lerp(t.scale, 1.0, 0.1);
+        }
+
+        p.push();
+        p.translate(t.x, t.y);
+        p.rotate(t.rot);
+        p.scale(t.scale);
+        p.imageMode(p.CENTER);
+        if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+        else drawImageCover(t.imgGray, tileSize, tileSize);
+        p.pop();
+      }
+    };
+  });
+  </script>
 </body>
 </html>

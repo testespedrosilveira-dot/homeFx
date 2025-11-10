@@ -45,6 +45,7 @@
     const canvasHeight = 350;
     const tileSize = 40;
     const maxTiles = 300;
+    const marginLeft = 300; // margem invisível à esquerda
 
     let imgs = [];
     let imgsGray = [];
@@ -91,7 +92,8 @@
     function generateTiles(){
       tiles = [];
       for(let i=0; i<maxTiles; i++){
-        const px = p.random(tileSize/2, canvasWidth - tileSize/2);
+        // limitar px para nunca entrar na margem
+        const px = p.random(tileSize/2 + marginLeft, canvasWidth - tileSize/2);
         const py = p.random(tileSize/2, canvasHeight - tileSize/2);
         tiles.push({
           x:px, y:py,

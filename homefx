@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>p5.js Tiles</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+  }
+  #p5-holder {
+    width: 500px;
+    height: 350px;
+  }
+</style>
+</head>
+<body>
+<div id="p5-holder"></div>
+
+<script>
+new p5((p) => {
+
+  const fileNames = [
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png?updatedAt=1762532608098",
+    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png?updatedAt=1762531855303",
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png?updatedAt=1762531656713",
+    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png?updatedAt=1762530995679",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg?updatedAt=1762471377127",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg?updatedAt=1762471376503",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg?updatedAt=1762471376125",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg?updatedAt=1762471375733"
+  ];
+
+  let imgs = [];
+  let imgsGray = [];
+  let tiles = [];
+  const tileSize = 30; // tamanho menor
+  const totalTiles = 180; // número fixo
+  let loadedCount = 0;
+
+  function drawImageCover(img, w, h){
+    let imgRatio = img.width / img.height;
+    let boxRatio = w / h;
+    let drawW = w, drawH = h;
+    if(imgRatio > boxRatio){
+      drawH = h;
+      drawW = imgRatio * drawH;
+    } else {
+      drawW = w;
+      drawH = drawW / imgRatio;
+    }
+    p.image(img, -drawW/2, -drawH/2, drawW, drawH);
+  }
+
+  fileNames.forEach((url, idx) => {
+    p.loadImage(url, (img) => {
+      imgs[idx] = img;
+
+      // criar versão grayscale
+      let g = p.createImage(img.width, img.height);
+      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+      g.loadPixels();
+      for(let i=0;i<g.pixels.length;i+=4){
+        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;

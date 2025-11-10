@@ -103,7 +103,7 @@ new p5((p) => {
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
         rot: 0,
-        scale: 1  // escala inicial 100%
+        scale: 1
       });
     }
   }
@@ -116,15 +116,19 @@ new p5((p) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;
 
-      // efeito invertido: escala diminui quando cursor passa
+      // cursor próximo: colorido + escala
       if(d < tileSize*2){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
-        t.scale = p.lerp(t.scale, 0.7, 0.25); // diminui
+        t.scale = p.lerp(t.scale, 1.45, 0.25);
         isMain = true;
-      } else if(d < tileSize*4){
+      } 
+      // vizinhos: P&B e leve redução
+      else if(d < tileSize*4){
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
-      } else {
+      } 
+      // longe: P&B e escala normal
+      else {
         t.rot = p.lerp(t.rot, 0, 0.1);
         t.scale = p.lerp(t.scale, 1.0, 0.1);
       }

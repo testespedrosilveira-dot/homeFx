@@ -12,27 +12,18 @@
       width: 100%;
       background: white;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      justify-content: center; /* centraliza horizontalmente */
+      align-items: center;    /* centraliza verticalmente */
       overflow: hidden;
     }
-
-    /* margem esquerda obrigatória de 300px */
-    #center-wrapper {
-      margin-left: 0px;
-    }
-
     #p5-holder {
-      width: 1900px;
-      height: 1000px;
+      width: 500px;
+      height: 350px;
     }
   </style>
 </head>
-
 <body>
-<div id="center-wrapper">
-  <div id="p5-holder"></div>
-</div>
+<div id="p5-holder"></div>
 
 <script>
 new p5((p) => {
@@ -48,10 +39,10 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
 
-  const canvasWidth = 1000;
-  const canvasHeight = 550;
+  const canvasWidth = 500;
+  const canvasHeight = 350;
   const tileSize = 40;
-  const maxTiles = 30;
+  const maxTiles = 300;
 
   let imgs = [];
   let imgsGray = [];
@@ -72,17 +63,15 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
-  // Carregar imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
 
-      // Criar grayscale
       let g = p.createImage(img.width, img.height);
       g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();
       for(let i=0; i<g.pixels.length; i+=4){
-        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2]) / 3;
+        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
         g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
       }
       g.updatePixels();
@@ -99,47 +88,44 @@ new p5((p) => {
 
   function generateTiles(){
     tiles = [];
-    for(let i=0; i<maxTiles; i++){
-      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
-      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+    
+    const margin = 100;  // ✅ SAFE-AREA de 100px (NÃO encosta na borda)
+
+    for (let i = 0; i < maxTiles; i++) {
+      const px = p.random(margin, canvasWidth - margin);
+      const py = p.random(margin, canvasHeight - margin);
+
       tiles.push({
         x: px,
         y: py,
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
-        rot: 0
+        rot: 0,
+        scale: 1
       });
     }
   }
 
-  // ✅ NOVO DRAW → sem escala, apenas colorizar
   p.draw = () => {
     p.background(255);
-    if(loadedCount < fileNames.length) return;
+    if (loadedCount < fileNames.length) return;
 
-    for(let t of tiles){
+    for (let t of tiles) {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
 
-      const isMain = d < tileSize * 2;
-
-      // rotação suave (se quiser remover, avise)
-      if(isMain) t.rot = p.lerp(t.rot, 0.12, 0.25);
-      else t.rot = p.lerp(t.rot, 0, 0.1);
+      const isMain = (d < tileSize * 2);
 
       p.push();
       p.translate(t.x, t.y);
       p.rotate(t.rot);
       p.imageMode(p.CENTER);
 
-      if(isMain)
-        drawImageCover(t.imgColor, tileSize, tileSize);
-      else
-        drawImageCover(t.imgGray, tileSize, tileSize);
+      if (isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+      else drawImageCover(t.imgGray, tileSize, tileSize);
 
       p.pop();
     }
   };
-
 });
 </script>
 </body>

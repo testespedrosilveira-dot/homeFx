@@ -5,13 +5,16 @@
   <title>HomeFX</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
-    body { margin:0; overflow:hidden; }
+    body { margin:0; overflow:hidden; background:white; }
+    #p5-holder { width:100%; height:100%; }
   </style>
 </head>
 <body>
+<div id="p5-holder"></div>
+
 <script>
 new p5((p) => {
-
+  // links das imagens no ImageKit
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -51,6 +54,7 @@ new p5((p) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
 
+      // criar versão grayscale
       let g = p.createImage(img.width, img.height);
       g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();
@@ -67,7 +71,7 @@ new p5((p) => {
   });
 
   p.setup = () => {
-    p.createCanvas(canvasWidth, canvasHeight);
+    p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
   };
 
   function generateTiles(){

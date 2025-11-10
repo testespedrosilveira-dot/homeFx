@@ -1,19 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Home FX</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-<style>
-  html, body { margin: 0; padding: 0; overflow: hidden; background: #fff; }
-  #p5-holder { width: 100%; height: 100%; }
-</style>
+  <meta charset="UTF-8">
+  <title>HomeFX</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <style>
+    body { margin:0; overflow:hidden; }
+    #p5-holder { width:100%; height:100%; }
+  </style>
 </head>
 <body>
 <div id="p5-holder"></div>
 
 <script>
-let canvas;
 new p5((p) => {
 
   const fileNames = [
@@ -21,82 +20,105 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
     "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg"
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
 
+  const canvasWidth = 500;
+  const canvasHeight = 350;
   const tileSize = 40;
   const maxTiles = 300;
 
-  let imgs=[], imgsGray=[], tiles=[], loadedCount=0;
+  let imgs = [];
+  let imgsGray = [];
+  let tiles = [];
+  let loadedCount = 0;
 
   function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
     let boxRatio = w / h;
-    let drawW=w, drawH=h;
-    if(imgRatio>boxRatio){ drawH=h; drawW=imgRatio*drawH; }
-    else{ drawW=w; drawH=drawW/imgRatio; }
+    let drawW = w, drawH = h;
+    if(imgRatio > boxRatio){
+      drawH = h;
+      drawW = imgRatio * drawH;
+    } else {
+      drawW = w;
+      drawH = drawW / imgRatio;
+    }
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
-  fileNames.forEach((url, idx)=>{
-    p.loadImage(url, (img)=>{
-      imgs[idx]=img;
-      let g=p.createImage(img.width,img.height);
-      g.copy(img,0,0,img.width,img.height,0,0,img.width,img.height);
+  fileNames.forEach((url, idx) => {
+    p.loadImage(url, (img) => {
+      imgs[idx] = img;
+
+      let g = p.createImage(img.width, img.height);
+      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();
-      for(let i=0;i<g.pixels.length;i+=4){
-        let gray=(g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i]=g.pixels[i+1]=g.pixels[i+2]=gray;
+      for(let i=0; i<g.pixels.length; i+=4){
+        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
+        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
       }
       g.updatePixels();
-      imgsGray[idx]=g;
+      imgsGray[idx] = g;
+
       loadedCount++;
-      if(loadedCount===fileNames.length) generateTiles();
+      if(loadedCount === fileNames.length) generateTiles();
     });
   });
 
-  p.setup=()=>{
-    canvas=p.createCanvas(window.innerWidth, window.innerHeight).parent("p5-holder");
+  p.setup = () => {
+    p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
     generateTiles();
   };
 
   function generateTiles(){
-    tiles=[];
-    for(let i=0;i<maxTiles;i++){
-      const px=p.random(tileSize/2, p.width-tileSize/2);
-      const py=p.random(tileSize/2, p.height-tileSize/2);
-      tiles.push({x:px,y:py,imgColor:imgs[i%imgs.length],imgGray:imgsGray[i%imgsGray.length],rot:0,scale:1});
+    tiles = [];
+    for(let i=0; i<maxTiles; i++){
+      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
+      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+      tiles.push({
+        x:px, y:py,
+        imgColor: imgs[i % imgs.length],
+        imgGray: imgsGray[i % imgsGray.length],
+        rot:0, scale:1
+      });
     }
   }
 
-  p.draw=()=>{
+  p.draw = () => {
     p.background(255);
-    if(loadedCount<fileNames.length) return;
+    if(loadedCount < fileNames.length) return;
+
     for(let t of tiles){
-      const d=p.dist(p.mouseX,p.mouseY,t.x,t.y);
-      let isMain=false;
-      if(d<tileSize*0.8){ t.rot=p.lerp(t.rot,0.1,0.25); t.scale=p.lerp(t.scale,1.45,0.25); isMain=true; }
-      else if(d<tileSize*1.5){ t.rot=p.lerp(t.rot,0,0.15); t.scale=p.lerp(t.scale,0.85,0.12); }
-      else{ t.rot=p.lerp(t.rot,0,0.1); t.scale=p.lerp(t.scale,1.0,0.1); }
+      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+      let isMain = false;
+
+      // aumentar a área de efeito
+      if(d < tileSize*2){
+        t.rot = p.lerp(t.rot, 0.1, 0.25);
+        t.scale = p.lerp(t.scale, 1.45, 0.25);
+        isMain = true;
+      } else if(d < tileSize*4){
+        t.rot = p.lerp(t.rot, 0, 0.15);
+        t.scale = p.lerp(t.scale, 0.85, 0.12);
+      } else {
+        t.rot = p.lerp(t.rot, 0, 0.1);
+        t.scale = p.lerp(t.scale, 1.0, 0.1);
+      }
+
       p.push();
-      p.translate(t.x,t.y);
+      p.translate(t.x, t.y);
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
-      if(isMain) drawImageCover(t.imgColor,tileSize,tileSize);
-      else drawImageCover(t.imgGray,tileSize,tileSize);
+      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+      else drawImageCover(t.imgGray, tileSize, tileSize);
       p.pop();
     }
   };
-
-  // Atualiza o canvas quando receber mensagem do Readymag sobre tamanho
-  window.addEventListener("message",(event)=>{
-    if(event.data.type==="resizeCanvas" && event.data.width && event.data.height){
-      p.resizeCanvas(event.data.width,event.data.height);
-      generateTiles();
-    }
-  },false);
-
 });
 </script>
 </body>

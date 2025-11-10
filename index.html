@@ -107,7 +107,11 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    p.background(255);
+    // Fundo semi-transparente cria o rastro
+    p.fill(255, 60); // ajusta alpha para mais ou menos rastro
+    p.noStroke();
+    p.rect(0, 0, p.width, p.height);
+
     if(loadedCount < fileNames.length) return;
 
     const mainRange = tileSize * 3;
@@ -141,11 +145,11 @@ new p5((p) => {
       let img = t.imgColor;
 
       if(isMain){
-        t.rot = p.lerp(t.rot, 0.3 * t.rotDirection, 0.25); // rotação mais intensa
+        t.rot = p.lerp(t.rot, 0.3 * t.rotDirection, 0.25);
         t.scale = p.lerp(t.scale, 1.8, 0.25); 
         img = t.imgColor;
       } else if(isPartial){
-        alpha = 18;
+        alpha = 18; // 7%
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
         img = t.imgGray;

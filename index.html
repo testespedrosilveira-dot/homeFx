@@ -11,14 +11,14 @@
       height: 100%;
       width: 100%;
       background: white;
+      overflow: hidden;
       display: flex;
       justify-content: center;
       align-items: center;
-      overflow: hidden;
     }
     #p5-holder {
-      width: 500px;
-      height: 350px;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -27,7 +27,7 @@
 
 <script>
 new p5((p) => {
-
+  // links das imagens no ImageKit
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -39,37 +39,13 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
 
-  const canvasWidth = 500;
-  const canvasHeight = 350;
   const tileSize = 40;
-  const maxTiles = 300;
-  const marginLeft = 100;
-  const marginRight = 100;
-  const marginTop = 60;
-  const marginBottom = 60;
+  const maxTiles = 300 * 3; // TRIPLICAMOS os retângulos
 
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
-
-  // --- PRELOAD para garantir que todas imagens estejam carregadas ---
-  p.preload = () => {
-    for (let f of fileNames) {
-      let img = p.loadImage(f);
-      imgs.push(img);
-
-      // criar placeholder grayscale
-      let g = p.createImage(img.width, img.height);
-      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-      g.loadPixels();
-      for(let i=0; i<g.pixels.length; i+=4){
-        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
-      }
-      g.updatePixels();
-      imgsGray.push(g);
-    }
-  };
+  let loadedCount = 0;
 
   function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
@@ -85,38 +61,59 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
+  fileNames.forEach((url, idx) => {
+    p.loadImage(url, (img) => {
+      imgs[idx] = img;
+
+      let g = p.createImage(img.width, img.height);
+      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+      g.loadPixels();
+      for(let i=0; i<g.pixels.length; i+=4){
+        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
+        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
+      }
+      g.updatePixels();
+      imgsGray[idx] = g;
+
+      loadedCount++;
+      if(loadedCount === fileNames.length) generateTiles();
+    });
+  });
+
+  p.setup = () => {
+    p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+  };
+
   function generateTiles(){
     tiles = [];
-    for (let i = 0; i < maxTiles; i++) {
-      const px = p.random(marginLeft, canvasWidth - marginRight);
-      const py = p.random(marginTop, canvasHeight - marginBottom);
+    for(let i=0; i<maxTiles; i++){
+      const px = p.random(tileSize/2, p.width - tileSize/2);
+      const py = p.random(tileSize/2, p.height - tileSize/2);
       tiles.push({
-        x: px,
-        y: py,
+        x:px, y:py,
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
-        rot: 0,
-        scale: 1
+        rot:0, scale:1
       });
     }
   }
 
-  p.setup = () => {
-    p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
-    generateTiles(); // só gera depois do preload
+  p.windowResized = () => {
+    p.resizeCanvas(p.windowWidth, p.windowHeight);
+    generateTiles();
   };
 
   p.draw = () => {
     p.background(255);
+    if(loadedCount < fileNames.length) return;
 
-    for (let t of tiles) {
+    for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;
 
-      // escala diminui quando cursor passa
       if(d < tileSize*2){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
-        t.scale = p.lerp(t.scale, 0.7, 0.25);
+        t.scale = p.lerp(t.scale, 1.45, 0.25);
         isMain = true;
       } else if(d < tileSize*4){
         t.rot = p.lerp(t.rot, 0, 0.15);

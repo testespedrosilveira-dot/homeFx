@@ -39,7 +39,7 @@ new p5((p) => {
   ];
 
   const tileSize = 40;
-  const maxTiles = 300 * 3; // TRIPLICAMOS os retângulos
+  const maxTiles = 300 * 3;
 
   let imgs = [];
   let imgsGray = [];
@@ -57,6 +57,7 @@ new p5((p) => {
       drawW = w;
       drawH = drawW / imgRatio;
     }
+    p.drawingContext.imageSmoothingEnabled = true; // ativa antialiasing
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
@@ -108,8 +109,8 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isVisible = d < tileSize*4; // visível apenas dentro dessa distância
-      if(!isVisible) continue; // retângulo invisível fora do alcance
+      const isVisible = d < tileSize*4;
+      if(!isVisible) continue;
 
       let isMain = d < tileSize*2;
 

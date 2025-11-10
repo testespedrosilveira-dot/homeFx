@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>HomeFX</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: white;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    #p5-holder { width: 100%; height: 100%; }
-  </style>
+<meta charset="UTF-8">
+<title>HomeFX Trail Effect</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+<style>
+  html, body {
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    background:white;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  #p5-holder { width:100%; height:100%; }
+</style>
 </head>
 <body>
 <div id="p5-holder"></div>
@@ -35,132 +35,123 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
 
-  const tileSize = 80;
-  const maxTiles = 300 * 3;
-  const mainRange = tileSize * 3;
-  const partialCount = 77;
-  const delayTime = 1500; // delay em milissegundos (0,5s)
+  const tileSize = 40;
+  const maxTiles = 300*3;
+  const mainRange = tileSize*3;
+  const partialCount = 23;
+  const fadeTime = 500; // ms do fade (rastro)
 
-  let imgs = [];
-  let imgsGray = [];
-  let tiles = [];
-  let loadedCount = 0;
+  let imgs = [], imgsGray = [], tiles = [], loadedCount = 0;
 
-  function drawImageCover(img, w, h, alpha = 255){
-    let imgRatio = img.width / img.height;
-    let boxRatio = w / h;
-    let drawW = w, drawH = h;
-    if(imgRatio > boxRatio){
-      drawH = h;
-      drawW = imgRatio * drawH;
-    } else {
-      drawW = w;
-      drawH = drawW / imgRatio;
-    }
-    p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha);
-    p.image(img, -drawW/2, -drawH/2, drawW, drawH);
+  function drawImageCover(img, w, h, alpha=255){
+    let ratio = img.width/img.height;
+    let boxRatio = w/h;
+    let drawW=w, drawH=h;
+    if(ratio>boxRatio){ drawH=h; drawW=ratio*drawH; }
+    else { drawW=w; drawH=drawW/ratio; }
+    p.drawingContext.imageSmoothingEnabled=true;
+    p.tint(255,alpha);
+    p.image(img,-drawW/2,-drawH/2,drawW,drawH);
     p.noTint();
   }
 
-  fileNames.forEach((url, idx) => {
-    p.loadImage(url, (img) => {
-      imgs[idx] = img;
-      let g = p.createImage(img.width, img.height);
-      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+  fileNames.forEach((url, idx)=>{
+    p.loadImage(url,(img)=>{
+      imgs[idx]=img;
+      let g=p.createImage(img.width,img.height);
+      g.copy(img,0,0,img.width,img.height,0,0,img.width,img.height);
       g.loadPixels();
-      for(let i=0; i<g.pixels.length; i+=4){
-        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
+      for(let i=0;i<g.pixels.length;i+=4){
+        let gray=(g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
+        g.pixels[i]=g.pixels[i+1]=g.pixels[i+2]=gray;
       }
       g.updatePixels();
-      imgsGray[idx] = g;
-
+      imgsGray[idx]=g;
       loadedCount++;
-      if(loadedCount === fileNames.length) generateTiles();
+      if(loadedCount===fileNames.length) generateTiles();
     });
   });
 
-  p.setup = () => {
-    p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-  };
-
   function generateTiles(){
-    tiles = [];
-    for(let i=0; i<maxTiles; i++){
-      const px = p.random(tileSize/2, p.width - tileSize/2);
-      const py = p.random(tileSize/2, p.height - tileSize/2);
+    tiles=[];
+    for(let i=0;i<maxTiles;i++){
+      const px=p.random(tileSize/2,p.width-tileSize/2);
+      const py=p.random(tileSize/2,p.height-tileSize/2);
       tiles.push({
         x:px,
         y:py,
-        imgColor: imgs[i % imgs.length],
-        imgGray: imgsGray[i % imgsGray.length],
-        rot:Math.random()*0.2-0.1, // rotação inicial aleatória
+        imgColor: imgs[i%imgs.length],
+        imgGray: imgsGray[i%imgsGray.length],
+        rot:Math.random()*0.2-0.1,
         scale:1,
-        targetScale:2,
+        alpha:0,         // alpha atual
+        targetScale:1,
         targetRot:0,
+        targetAlpha:0,
         lastUpdate:p.millis()
       });
     }
   }
 
-  p.windowResized = () => {
-    p.resizeCanvas(p.windowWidth, p.windowHeight);
-    generateTiles();
-  };
+  p.setup=()=>{ p.createCanvas(p.windowWidth,p.windowHeight).parent("p5-holder"); }
+  p.windowResized=()=>{ p.resizeCanvas(p.windowWidth,p.windowHeight); generateTiles(); }
 
-  p.draw = () => {
+  p.draw=()=>{
     p.background(255);
-    if(loadedCount < fileNames.length) return;
 
-    let distances = tiles.map((t,i) => ({ index:i, dist:p.dist(p.mouseX,p.mouseY,t.x,t.y) }));
-    distances.sort((a,b) => a.dist - b.dist);
+    if(loadedCount<fileNames.length) return;
 
-    let partialIndexes = [];
-    for(let i=0; i<distances.length; i++){
-      if(distances[i].dist > mainRange){
+    // calcula distâncias
+    let distances = tiles.map((t,i)=>({index:i, dist:p.dist(p.mouseX,p.mouseY,t.x,t.y)}));
+    distances.sort((a,b)=>a.dist-b.dist);
+
+    let partialIndexes=[];
+    for(let i=0;i<distances.length;i++){
+      if(distances[i].dist>mainRange){
         partialIndexes.push(distances[i].index);
-        if(partialIndexes.length >= partialCount) break;
+        if(partialIndexes.length>=partialCount) break;
       }
     }
 
-    tiles.forEach((t,i) => {
+    tiles.forEach((t,i)=>{
       const d = p.dist(p.mouseX,p.mouseY,t.x,t.y);
-      const isMain = d < mainRange;
+      const isMain = d<mainRange;
       const isPartial = partialIndexes.includes(i);
 
-      if(!isMain && !isPartial) return; // invisível
-
-      let img = t.imgGray;
-      let alpha = 255;
-
+      // definir targets
       if(isMain){
-        img = t.imgColor;
-        t.targetScale = 1.45;
-        t.targetRot = Math.random()*0.2-0.1;
+        t.targetScale=1.45;
+        t.targetRot=Math.random()*0.2-0.1;
+        t.targetAlpha=255;
       } else if(isPartial){
-        img = t.imgGray;
-        alpha = 18; // 7%
-        t.targetScale = 0.85;
-        t.targetRot = Math.random()*0.1-0.05;
+        t.targetScale=0.85;
+        t.targetRot=Math.random()*0.1-0.05;
+        t.targetAlpha=18;
+      } else {
+        t.targetScale=1;
+        t.targetRot=0;
+        t.targetAlpha=0;
       }
 
-      // delay de 0,5s
-      const elapsed = p.millis() - t.lastUpdate;
-      const lerpFactor = elapsed < delayTime ? 0.05 : 0.25;
-      t.scale = p.lerp(t.scale, t.targetScale, lerpFactor);
-      t.rot = p.lerp(t.rot, t.targetRot, lerpFactor);
-      if(elapsed > delayTime) t.lastUpdate = p.millis();
+      // lerp com rastro/fade
+      const elapsed=p.millis()-t.lastUpdate;
+      const factor=0.05; // suavidade da transição
+      t.scale=p.lerp(t.scale,t.targetScale,factor);
+      t.rot=p.lerp(t.rot,t.targetRot,factor);
+      t.alpha=p.lerp(t.alpha,t.targetAlpha,factor);
+      t.lastUpdate=p.millis();
 
-      p.push();
-      p.translate(t.x,t.y);
-      p.rotate(t.rot);
-      p.scale(t.scale);
-      p.imageMode(p.CENTER);
-      drawImageCover(img,tileSize,tileSize,alpha);
-      p.pop();
+      if(t.alpha>0.1){
+        p.push();
+        p.translate(t.x,t.y);
+        p.rotate(t.rot);
+        p.scale(t.scale);
+        p.imageMode(p.CENTER);
+        drawImageCover(isMain?t.imgColor:t.imgGray,tileSize,tileSize,t.alpha);
+        p.pop();
+      }
     });
-  };
+  }
 });
 </script>
 </body>

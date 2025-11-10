@@ -109,16 +109,19 @@ new p5((p) => {
     if(loadedCount < fileNames.length) return;
 
     const mainRange = tileSize * 3;
-    const partialCount = 3;
+    const partialCount = 12; // agora são 12 retângulos próximos
     let distances = [];
 
+    // calcular distâncias de todos os tiles
     tiles.forEach((t, i) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       distances.push({ index: i, dist: d });
     });
 
+    // ordenar pela distância
     distances.sort((a,b) => a.dist - b.dist);
 
+    // pegar os 12 mais próximos fora do mainRange
     let partialIndexes = [];
     for(let i=0; i<distances.length; i++){
       if(distances[i].dist > mainRange){
@@ -129,20 +132,21 @@ new p5((p) => {
 
     tiles.forEach((t, i) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+
       let isMain = d < mainRange;
       let isPartial = partialIndexes.includes(i);
 
-      if(!isMain && !isPartial) return;
+      if(!isMain && !isPartial) return; // invisível
 
       let alpha = 255;
       let img = t.imgColor;
 
       if(isMain){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
-        t.scale = p.lerp(t.scale, 1.8, 0.25); // aumentei a escala
+        t.scale = p.lerp(t.scale, 1.8, 0.25); // escala maior
         img = t.imgColor;
       } else if(isPartial){
-        alpha = 18;
+        alpha = 18; // 7% de opacidade
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
         img = t.imgGray;

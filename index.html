@@ -18,10 +18,10 @@ new p5((p) => {
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
-  const tileSize = 40; // menor para caber melhor
+  const tileSize = 40; 
   const totalTiles = 180;
-  const offsetX = 100;
-  const offsetY = 100;
+  const offsetX = 200; // move para a direita
+  const offsetY = 500; // move para baixo
   let loadedCount = 0;
 
   function drawImageCover(img, w, h){
@@ -42,7 +42,6 @@ new p5((p) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
 
-      // criar versão grayscale
       let g = p.createImage(img.width, img.height);
       g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();

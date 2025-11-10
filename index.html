@@ -11,14 +11,11 @@
       height: 100%;
       width: 100%;
       background: white;
-      display: flex;
-      justify-content: center; /* centraliza horizontalmente */
-      align-items: center;    /* centraliza verticalmente */
       overflow: hidden;
     }
     #p5-holder {
-      width: 500px;  /* largura fixa do widget */
-      height: 350px; /* altura fixa do widget */
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
@@ -27,7 +24,6 @@
 
 <script>
 new p5((p) => {
-  // links das imagens no ImageKit
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -39,8 +35,6 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
 
-  const canvasWidth = 500;
-  const canvasHeight = 350;
   const tileSize = 40;
   const maxTiles = 300;
 
@@ -82,15 +76,28 @@ new p5((p) => {
     });
   });
 
+  let canvasW, canvasH;
+
   p.setup = () => {
-    p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
+    canvasW = p.windowWidth;
+    canvasH = p.windowHeight;
+    p.createCanvas(canvasW, canvasH).parent("p5-holder");
+    generateTiles();
+  };
+
+  p.windowResized = () => {
+    canvasW = p.windowWidth;
+    canvasH = p.windowHeight;
+    p.resizeCanvas(canvasW, canvasH);
+    generateTiles();
   };
 
   function generateTiles(){
     tiles = [];
     for(let i=0; i<maxTiles; i++){
-      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
-      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+      // evita que fiquem nos cantos
+      const px = p.random(tileSize*2, canvasW - tileSize*2);
+      const py = p.random(tileSize*2, canvasH - tileSize*2);
       tiles.push({
         x:px, y:py,
         imgColor: imgs[i % imgs.length],

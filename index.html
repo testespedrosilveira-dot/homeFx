@@ -111,8 +111,8 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const mainDistance = tileSize * 18; // triplicado do 6
-      const visibleDistance = tileSize * 36; // triplicado do 12
+      const mainDistance = tileSize * 12; // 2x do valor original 6
+      const visibleDistance = tileSize * 24; // 2x do valor original 12
 
       const isMain = d < mainDistance;
       const isVisible = d < visibleDistance;

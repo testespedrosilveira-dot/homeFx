@@ -12,8 +12,8 @@
       width: 100%;
       background: white;
       display: flex;
-      justify-content: center; /* centraliza horizontalmente */
-      align-items: center;    /* centraliza verticalmente */
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
     }
     #p5-holder {
@@ -89,11 +89,14 @@ new p5((p) => {
   function generateTiles(){
     tiles = [];
     
-    const margin = 100;  // ✅ SAFE-AREA de 100px (NÃO encosta na borda)
+    const marginLeft = 100;
+    const marginRight = 100;
+    const marginTop = 60;    // safe-area superior
+    const marginBottom = 60; // safe-area inferior
 
     for (let i = 0; i < maxTiles; i++) {
-      const px = p.random(margin, canvasWidth - margin);
-      const py = p.random(margin, canvasHeight - margin);
+      const px = p.random(marginLeft, canvasWidth - marginRight);
+      const py = p.random(marginTop, canvasHeight - marginBottom);
 
       tiles.push({
         x: px,
@@ -112,7 +115,6 @@ new p5((p) => {
 
     for (let t of tiles) {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-
       const isMain = (d < tileSize * 2);
 
       p.push();

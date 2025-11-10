@@ -58,7 +58,7 @@ new p5((p) => {
       drawH = drawW / imgRatio;
     }
     p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha); // define a opacidade
+    p.tint(255, alpha);
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
     p.noTint();
   }
@@ -111,8 +111,11 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isMain = d < tileSize*2;
-      const alpha = isMain ? 255 : 18; // 7% para retângulos fora do alcance
+
+      const isMain = d < tileSize * 0.8;    // 60% menor que 2
+      const isVisible = d < tileSize * 4.8;  // 60% menor que 12
+
+      const alpha = isVisible ? 255 : 18; // 7% de opacidade fora do alcance
 
       t.rot = p.lerp(t.rot, isMain ? 0.1 : 0, isMain ? 0.25 : 0.1);
       t.scale = p.lerp(t.scale, isMain ? 1.45 : 1.0, isMain ? 0.25 : 0.1);

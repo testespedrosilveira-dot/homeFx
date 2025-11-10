@@ -1,130 +1,131 @@
-<div id="p5-holder" style="width:700px; height:500px;"></div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-<script>
-new p5((p) => {
-
-  const fileNames = [
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
-  ];
-
-  let imgs = [];
-  let imgsGray = [];
-  let tiles = [];
-  const tileSize = 50;       // tamanho dos tiles
-  const tileScale = 1.3;     // escala máxima no hover
-  const totalTiles = 180;    // total de tiles
-  const offsetX = 200;       // deslocamento horizontal
-  const offsetY = 500;       // deslocamento vertical
-  let loadedCount = 0;
-
-  // aumenta a densidade de pixels (tela retina)
-  p.pixelDensity(2);
-
-  // função para desenhar imagem mantendo proporção
-  function drawImageCover(img, w, h){
-    const imgRatio = img.width / img.height;
-    const boxRatio = w / h;
-    let drawW = w, drawH = h;
-
-    if(imgRatio > boxRatio){
-      drawH = h;
-      drawW = img.width * (drawH / img.height);
-    } else {
-      drawW = w;
-      drawH = img.height * (drawW / img.width);
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>homeFx</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: #fff;
     }
+    #p5-holder {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <div id="p5-holder"></div>
+  <script>
+    new p5((p) => {
+      const fileNames = [
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+      ];
 
-    p.image(img, -drawW/2, -drawH/2, drawW, drawH);
-  }
+      let imgs = [], imgsGray = [], tiles = [];
+      const tileSize = 52, totalTiles = 180;
+      let loadedCount = 0;
 
-  // carregar imagens
-  fileNames.forEach((url, idx) => {
-    p.loadImage(url, (img) => {
-      imgs[idx] = img;
-
-      // criar versão grayscale
-      let g = p.createImage(img.width, img.height);
-      g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
-      g.loadPixels();
-      for(let i=0;i<g.pixels.length;i+=4){
-        const gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
+      function drawImageCover(img, w, h){
+        let imgRatio = img.width / img.height;
+        let boxRatio = w / h;
+        let drawW = w, drawH = h;
+        if(imgRatio > boxRatio){
+          drawH = h;
+          drawW = imgRatio * drawH;
+        } else {
+          drawW = w;
+          drawH = drawW / imgRatio;
+        }
+        p.image(img, -drawW/2, -drawH/2, drawW, drawH);
       }
-      g.updatePixels();
-      imgsGray[idx] = g;
 
-      loadedCount++;
-      if(loadedCount === fileNames.length) generateTiles();
-    });
-  });
+      // carregar imagens
+      fileNames.forEach((url, idx) => {
+        p.loadImage(url, (img) => {
+          imgs[idx] = img;
+          // versão grayscale
+          let g = p.createImage(img.width, img.height);
+          g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
+          g.loadPixels();
+          for(let i=0;i<g.pixels.length;i+=4){
+            let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
+            g.pixels[i] = g.pixels[i+1] = g.pixels[i+2] = gray;
+          }
+          g.updatePixels();
+          imgsGray[idx] = g;
 
-  p.setup = () => {
-    p.createCanvas(700, 500).parent("p5-holder"); // tamanho fixo
-  };
-
-  p.windowResized = () => {
-    p.resizeCanvas(700, 500);
-    generateTiles();
-  };
-
-  function generateTiles(){
-    tiles = [];
-    const centerX = p.width/2;
-    const centerY = p.height/2;
-
-    for(let i=0;i<totalTiles;i++){
-      const angle = p.random(p.TWO_PI);
-      const r = Math.sqrt(p.random()) * 0.8; // distância do centro
-      const px = centerX + (p.width/2 - tileSize) * r;
-      const py = centerY + (p.height/2 - tileSize) * r;
-      tiles.push({
-        x: px,
-        y: py,
-        imgColor: imgs[i % imgs.length],
-        imgGray: imgsGray[i % imgsGray.length],
-        rot: 0,
-        scale: 1
+          loadedCount++;
+          if(loadedCount === fileNames.length) generateTiles();
+        });
       });
-    }
-  }
 
-  p.draw = () => {
-    p.background(255); // fundo branco
-    if(loadedCount < fileNames.length) return;
+      p.setup = () => {
+        p.createCanvas(700, 500).parent("p5-holder");
+      };
 
-    for(let t of tiles){
-      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      let isMain = false;
+      p.windowResized = () => {
+        p.resizeCanvas(700, 500);
+        generateTiles();
+      };
 
-      if(d < tileSize){ 
-        t.scale = p.lerp(t.scale, tileScale, 0.2);
-        t.rot = p.lerp(t.rot, 0.1, 0.2);
-        isMain = true;
-      } else if(d < tileSize*2){ 
-        t.scale = p.lerp(t.scale, 0.85, 0.1);
-        t.rot = p.lerp(t.rot, 0, 0.1);
-      } else { 
-        t.scale = p.lerp(t.scale, 1.0, 0.05);
-        t.rot = p.lerp(t.rot, 0, 0.05);
+      function generateTiles(){
+        tiles = [];
+        for(let i=0;i<totalTiles;i++){
+          const angle = p.random(p.TWO_PI);
+          const r = Math.sqrt(p.random());
+          const px = 200 + 500/2 + (500/2)*r*Math.cos(angle); // deslocamento x
+          const py = 500/2 + (500/2)*r*Math.sin(angle); // deslocamento y
+          tiles.push({
+            x:px, y:py,
+            imgColor: imgs[i%imgs.length],
+            imgGray: imgsGray[i%imgsGray.length],
+            rot:0, scale:1
+          });
+        }
       }
 
-      p.push();
-      p.translate(t.x + offsetX - 100, t.y + offsetY - 100); // ajusta posição
-      p.rotate(t.rot);
-      p.scale(t.scale);
-      p.imageMode(p.CENTER);
-      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
-      else drawImageCover(t.imgGray, tileSize, tileSize);
-      p.pop();
-    }
-  };
-});
-</script>
+      p.draw = () => {
+        p.background(255);
+        if(loadedCount<fileNames.length) return;
+
+        for(let t of tiles){
+          const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+          let isMain = false;
+
+          if(d<tileSize*0.8){
+            t.rot = p.lerp(t.rot, 0.1, 0.25);
+            t.scale = p.lerp(t.scale, 1.45, 0.25);
+            isMain = true;
+          } else if(d<tileSize*1.5){
+            t.rot = p.lerp(t.rot,0,0.15);
+            t.scale = p.lerp(t.scale,0.85,0.12);
+          } else {
+            t.rot = p.lerp(t.rot,0,0.1);
+            t.scale = p.lerp(t.scale,1.0,0.1);
+          }
+
+          p.push();
+          p.translate(t.x,t.y);
+          p.rotate(t.rot);
+          p.scale(t.scale);
+          p.imageMode(p.CENTER);
+          if(isMain) drawImageCover(t.imgColor,tileSize,tileSize);
+          else drawImageCover(t.imgGray,tileSize,tileSize);
+          p.pop();
+        }
+      };
+    });
+  </script>
+</body>
+</html>

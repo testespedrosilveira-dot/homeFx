@@ -108,28 +108,48 @@ new p5((p) => {
     p.background(255);
     if(loadedCount < fileNames.length) return;
 
-    for(let t of tiles){
+    const mainRange = tileSize * 3;
+    const partialCount = 3; // apenas 3 retângulos próximos
+    let distances = [];
+
+    // calcular distâncias de todos os tiles
+    tiles.forEach((t, i) => {
+      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+      distances.push({ index: i, dist: d });
+    });
+
+    // ordenar pela distância
+    distances.sort((a,b) => a.dist - b.dist);
+
+    // pegar os 3 mais próximos fora do mainRange
+    let partialIndexes = [];
+    for(let i=0; i<distances.length; i++){
+      if(distances[i].dist > mainRange){
+        partialIndexes.push(distances[i].index);
+        if(partialIndexes.length >= partialCount) break;
+      }
+    }
+
+    tiles.forEach((t, i) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
 
-      // distância para efeito principal e para opacidade parcial
-      const mainRange = tileSize * 3;       // efeito completo
-      const partialRange = tileSize * 6;    // efeito de opacidade parcial
+      let isMain = d < mainRange;
+      let isPartial = partialIndexes.includes(i);
 
-      if(d > partialRange) continue; // invisível fora do alcance
+      if(!isMain && !isPartial) return; // invisível
 
-      let alpha = 255; // padrão para efeito principal
-      if(d > mainRange && d <= partialRange){
-        alpha = 18; // 7% de opacidade para retângulos no range parcial
-      }
+      let alpha = 255;
+      let img = t.imgColor;
 
-      if(d < mainRange){
+      if(isMain){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
         t.scale = p.lerp(t.scale, 1.45, 0.25);
-        drawImageCover(t.imgColor, tileSize, tileSize, alpha);
-      } else {
+        img = t.imgColor;
+      } else if(isPartial){
+        alpha = 18; // 7% de opacidade
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
-        drawImageCover(t.imgGray, tileSize, tileSize, alpha);
+        img = t.imgGray;
       }
 
       p.push();
@@ -137,8 +157,9 @@ new p5((p) => {
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
+      drawImageCover(img, tileSize, tileSize, alpha);
       p.pop();
-    }
+    });
   };
 });
 </script>

@@ -1,27 +1,31 @@
-<div id="p5-holder" style="width:500px; height:350px;"></div>
+<iframe src="https://testespedrosilveira-dot.github.io/homeFx/" 
+        width="500" 
+        height="350" 
+        style="border:none;"></iframe>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <script>
 new p5((p) => {
 
   const fileNames = [
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png?updatedAt=1762532608098",
-    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png?updatedAt=1762531855303",
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png?updatedAt=1762531656713",
-    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png?updatedAt=1762530995679",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg?updatedAt=1762471377127",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg?updatedAt=1762471376503",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg?updatedAt=1762471376125",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg?updatedAt=1762471375733"
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
   ];
+
+  const canvasWidth = 500;
+  const canvasHeight = 350;
+  const tileSize = 40;
+  const numTiles = 180;
 
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
-  const tileSize = 40; 
-  const totalTiles = 180;
-  const offsetX = 200; // move para a direita
-  const offsetY = 500; // move para baixo
   let loadedCount = 0;
 
   function drawImageCover(img, w, h){
@@ -58,21 +62,21 @@ new p5((p) => {
   });
 
   p.setup = () => {
-    p.createCanvas(500, 350).parent("p5-holder");
+    p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
+    generateTiles();
   };
 
   function generateTiles(){
     tiles = [];
-    for(let i=0; i<totalTiles; i++){
-      const px = p.random(tileSize/2, p.width-tileSize/2);
-      const py = p.random(tileSize/2, p.height-tileSize/2);
+    for(let i=0;i<numTiles;i++){
+      // Distribuição aleatória dentro do canvas inteiro
+      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
+      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
       tiles.push({
-        x: px,
-        y: py,
+        x:px, y:py,
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
-        rot: 0,
-        scale: 1
+        rot:0, scale:1
       });
     }
   }
@@ -84,7 +88,6 @@ new p5((p) => {
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;
-
       if(d < tileSize*0.8){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
         t.scale = p.lerp(t.scale, 1.45, 0.25);
@@ -92,13 +95,13 @@ new p5((p) => {
       } else if(d < tileSize*1.5){
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
-      } else{
+      } else {
         t.rot = p.lerp(t.rot, 0, 0.1);
         t.scale = p.lerp(t.scale, 1.0, 0.1);
       }
 
       p.push();
-      p.translate(t.x + offsetX, t.y + offsetY); // aplica deslocamento
+      p.translate(t.x, t.y);
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
@@ -107,6 +110,5 @@ new p5((p) => {
       p.pop();
     }
   };
-
 });
 </script>

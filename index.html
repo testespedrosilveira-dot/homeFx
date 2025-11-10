@@ -44,6 +44,7 @@ new p5((p) => {
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
+  const trailDuration = 500; // 500ms
 
   function drawImageCover(img, w, h, alpha = 255){
     let imgRatio = img.width / img.height;
@@ -65,7 +66,6 @@ new p5((p) => {
   fileNames.forEach((url, idx) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
-
       let g = p.createImage(img.width, img.height);
       g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();
@@ -91,12 +91,14 @@ new p5((p) => {
       const px = p.random(tileSize/2, p.width - tileSize/2);
       const py = p.random(tileSize/2, p.height - tileSize/2);
       tiles.push({
-        x:px, y:py,
+        x:px, 
+        y:py,
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
         rot: 0,
         scale: 1,
-        rotDirection: p.random([-1,1])
+        rotDirection: p.random([-1,1]),
+        lastActive: 0 // timestamp do último contato com cursor
       });
     }
   }
@@ -107,10 +109,7 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    // Fundo semi-transparente cria o rastro
-    p.fill(255, 60); // ajusta alpha para mais ou menos rastro
-    p.noStroke();
-    p.rect(0, 0, p.width, p.height);
+    p.background(255);
 
     if(loadedCount < fileNames.length) return;
 
@@ -133,26 +132,30 @@ new p5((p) => {
       }
     }
 
+    const now = p.millis();
+
     tiles.forEach((t, i) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-
       let isMain = d < mainRange;
       let isPartial = partialIndexes.includes(i);
 
-      if(!isMain && !isPartial) return;
+      if(isMain || isPartial){
+        t.lastActive = now; // atualiza timestamp
+      }
 
-      let alpha = 255;
-      let img = t.imgColor;
+      // calcula alpha baseado no tempo desde a ativação
+      const elapsed = now - t.lastActive;
+      if(elapsed > trailDuration) return; // invisível após 0.5s
+      let alpha = isMain ? 255 : 255 * (1 - elapsed/trailDuration); // decresce gradualmente
+      let img = isMain ? t.imgColor : t.imgGray;
 
+      // animação
       if(isMain){
         t.rot = p.lerp(t.rot, 0.3 * t.rotDirection, 0.25);
         t.scale = p.lerp(t.scale, 1.8, 0.25); 
-        img = t.imgColor;
-      } else if(isPartial){
-        alpha = 18; // 7%
+      } else {
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
-        img = t.imgGray;
       }
 
       p.push();

@@ -44,7 +44,7 @@ new p5((p) => {
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
-  const trailDuration = 500; // 500ms
+  const trailDuration = 500; // duração do rastro em ms
 
   function drawImageCover(img, w, h, alpha = 255){
     let imgRatio = img.width / img.height;
@@ -98,7 +98,8 @@ new p5((p) => {
         rot: 0,
         scale: 1,
         rotDirection: p.random([-1,1]),
-        lastActive: 0 // timestamp do último contato com cursor
+        lastActive: 0,    // timestamp do último contato com cursor
+        lastType: 'none'  // 'main' ou 'partial'
       });
     }
   }
@@ -139,18 +140,23 @@ new p5((p) => {
       let isMain = d < mainRange;
       let isPartial = partialIndexes.includes(i);
 
-      if(isMain || isPartial){
-        t.lastActive = now; // atualiza timestamp
+      // atualiza timestamp e tipo
+      if(isMain) {
+        t.lastActive = now;
+        t.lastType = 'main';
+      } else if(isPartial) {
+        t.lastActive = now;
+        t.lastType = 'partial';
       }
 
       // calcula alpha baseado no tempo desde a ativação
       const elapsed = now - t.lastActive;
-      if(elapsed > trailDuration) return; // invisível após 0.5s
-      let alpha = isMain ? 255 : 255 * (1 - elapsed/trailDuration); // decresce gradualmente
-      let img = isMain ? t.imgColor : t.imgGray;
+      if(elapsed > trailDuration) return; // sumir totalmente
+      let alpha = t.lastType === 'main' ? 255 : 255 * (1 - elapsed/trailDuration);
+      let img = t.lastType === 'main' ? t.imgColor : t.imgGray;
 
       // animação
-      if(isMain){
+      if(t.lastType === 'main'){
         t.rot = p.lerp(t.rot, 0.3 * t.rotDirection, 0.25);
         t.scale = p.lerp(t.scale, 1.8, 0.25); 
       } else {

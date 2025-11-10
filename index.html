@@ -88,7 +88,6 @@ new p5((p) => {
 
   function generateTiles(){
     tiles = [];
-    
     const marginLeft = 100;
     const marginRight = 100;
     const marginTop = 60;
@@ -111,20 +110,25 @@ new p5((p) => {
 
   p.draw = () => {
     p.background(255);
-    if (loadedCount < fileNames.length) return;
+    if(loadedCount < fileNames.length) return;
 
     for (let t of tiles) {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;
 
+      // cursor próximo: colorido + escala
       if(d < tileSize*2){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
         t.scale = p.lerp(t.scale, 1.45, 0.25);
         isMain = true;
-      } else if(d < tileSize*4){
+      } 
+      // vizinhos: P&B e leve redução
+      else if(d < tileSize*4){
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
-      } else {
+      } 
+      // longe: P&B e escala normal
+      else {
         t.rot = p.lerp(t.rot, 0, 0.1);
         t.scale = p.lerp(t.scale, 1.0, 0.1);
       }

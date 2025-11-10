@@ -50,6 +50,7 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
+  // carregar imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
@@ -74,11 +75,14 @@ new p5((p) => {
     p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
   };
 
+  // gerar tiles sem ocupar cantos
   function generateTiles(){
     tiles = [];
+    const marginX = tileSize;  // evita cantos horizontais
+    const marginY = tileSize;  // evita cantos verticais
     for(let i=0; i<maxTiles; i++){
-      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
-      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+      const px = p.random(marginX, canvasWidth - marginX);
+      const py = p.random(marginY, canvasHeight - marginY);
       tiles.push({
         x:px, y:py,
         imgColor: imgs[i % imgs.length],

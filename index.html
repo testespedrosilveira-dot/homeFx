@@ -58,7 +58,7 @@ new p5((p) => {
       drawH = drawW / imgRatio;
     }
     p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha); // define a opacidade
+    p.tint(255, alpha);
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
     p.noTint();
   }
@@ -111,10 +111,13 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isMain = d < tileSize*6;
-      const isVisible = d < tileSize*12;
+      const mainDistance = tileSize * 18; // triplicado do 6
+      const visibleDistance = tileSize * 36; // triplicado do 12
 
-      let alpha = isVisible ? 255 : 18; // 7% de opacidade para fora do alcance
+      const isMain = d < mainDistance;
+      const isVisible = d < visibleDistance;
+
+      let alpha = isVisible ? 255 : 18; // 7% de opacidade quando longe
 
       if(isMain){
         t.rot = p.lerp(t.rot, 0.1, 0.25);

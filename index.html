@@ -111,7 +111,7 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const range = tileSize * 2 * 1.2; // alcance aumentado em 20%
+      const range = tileSize * 2 * 1.6; // alcance aumentado em 60%
       const isMain = d < range;
 
       if(isMain){

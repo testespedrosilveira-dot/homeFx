@@ -21,7 +21,7 @@ new p5((p) => {
   const canvasWidth = 500;
   const canvasHeight = 350;
   const tileSize = 40;
-  const maxTiles = 600; // número máximo de retângulos
+  const maxTiles = 300; // máximo de retângulos
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
@@ -29,7 +29,6 @@ new p5((p) => {
 
   let featherMask;
 
-  // cria uma máscara circular com feather
   function createFeatherMask(size){
     let pg = p.createGraphics(size, size);
     pg.noStroke();
@@ -55,7 +54,6 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
-  // carregar imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
@@ -77,15 +75,20 @@ new p5((p) => {
 
   p.setup = () => {
     p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
-    featherMask = createFeatherMask(tileSize); // máscara usada para feather
-    generateTiles();
+    featherMask = createFeatherMask(tileSize);
   };
 
   function generateTiles(){
     tiles = [];
+    const ellipseW = canvasWidth * 0.9;
+    const ellipseH = canvasHeight * 0.8;
+
     for(let i=0;i<maxTiles;i++){
-      const px = p.random(tileSize/2, canvasWidth - tileSize/2);
-      const py = p.random(tileSize/2, canvasHeight - tileSize/2);
+      const angle = p.random(p.TWO_PI);
+      const r = Math.sqrt(p.random());
+      const px = canvasWidth/2 + (ellipseW/2) * r * Math.cos(angle);
+      const py = canvasHeight/2 + (ellipseH/2) * r * Math.sin(angle);
+
       tiles.push({
         x:px, y:py,
         imgColor: imgs[i % imgs.length],
@@ -120,7 +123,7 @@ new p5((p) => {
       p.scale(t.scale);
       p.imageMode(p.CENTER);
 
-      // desenha com feather usando mask
+      // aplicar feather
       p.push();
       let imgToDraw = isMain ? t.imgColor : t.imgGray;
       imgToDraw.mask(featherMask);

@@ -21,24 +21,12 @@ new p5((p) => {
   const canvasWidth = 500;
   const canvasHeight = 350;
   const tileSize = 40;
-  const maxTiles = 300; // máximo de retângulos
+  const maxTiles = 300;
+
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
-
-  let featherMask;
-
-  function createFeatherMask(size){
-    let pg = p.createGraphics(size, size);
-    pg.noStroke();
-    for(let r=size/2; r>0; r--){
-      let alpha = p.map(r, 0, size/2, 0, 255);
-      pg.fill(255, alpha);
-      pg.ellipse(size/2, size/2, r*2, r*2);
-    }
-    return pg;
-  }
 
   function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
@@ -75,7 +63,6 @@ new p5((p) => {
 
   p.setup = () => {
     p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
-    featherMask = createFeatherMask(tileSize);
   };
 
   function generateTiles(){
@@ -122,14 +109,8 @@ new p5((p) => {
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
-
-      // aplicar feather
-      p.push();
-      let imgToDraw = isMain ? t.imgColor : t.imgGray;
-      imgToDraw.mask(featherMask);
-      drawImageCover(imgToDraw, tileSize, tileSize);
-      p.pop();
-
+      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+      else drawImageCover(t.imgGray, tileSize, tileSize);
       p.pop();
     }
   };

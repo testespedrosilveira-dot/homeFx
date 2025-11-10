@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>HomeFX</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-  <style>
-    body { margin:0; overflow:hidden; }
-    #p5-holder { width:100%; height:100%; }
-  </style>
-</head>
-<body>
-<div id="p5-holder"></div>
+<iframe src="https://testespedrosilveira-dot.github.io/homeFx/" 
+        width="500" 
+        height="350" 
+        style="border:none;"></iframe>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <script>
 new p5((p) => {
 
@@ -28,13 +20,26 @@ new p5((p) => {
 
   const canvasWidth = 500;
   const canvasHeight = 350;
-  const tileSize = 10;
-  const maxTiles = 1600;
-
+  const tileSize = 40;
+  const maxTiles = 600; // número máximo de retângulos
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
+
+  let featherMask;
+
+  // cria uma máscara circular com feather
+  function createFeatherMask(size){
+    let pg = p.createGraphics(size, size);
+    pg.noStroke();
+    for(let r=size/2; r>0; r--){
+      let alpha = p.map(r, 0, size/2, 0, 255);
+      pg.fill(255, alpha);
+      pg.ellipse(size/2, size/2, r*2, r*2);
+    }
+    return pg;
+  }
 
   function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
@@ -50,6 +55,7 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
+  // carregar imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
@@ -71,12 +77,13 @@ new p5((p) => {
 
   p.setup = () => {
     p.createCanvas(canvasWidth, canvasHeight).parent("p5-holder");
+    featherMask = createFeatherMask(tileSize); // máscara usada para feather
     generateTiles();
   };
 
   function generateTiles(){
     tiles = [];
-    for(let i=0; i<maxTiles; i++){
+    for(let i=0;i<maxTiles;i++){
       const px = p.random(tileSize/2, canvasWidth - tileSize/2);
       const py = p.random(tileSize/2, canvasHeight - tileSize/2);
       tiles.push({
@@ -95,13 +102,11 @@ new p5((p) => {
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;
-
-      // aumentar a área de efeito
-      if(d < tileSize*2){
+      if(d < tileSize*0.8){
         t.rot = p.lerp(t.rot, 0.1, 0.25);
         t.scale = p.lerp(t.scale, 1.45, 0.25);
         isMain = true;
-      } else if(d < tileSize*4){
+      } else if(d < tileSize*1.5){
         t.rot = p.lerp(t.rot, 0, 0.15);
         t.scale = p.lerp(t.scale, 0.85, 0.12);
       } else {
@@ -114,12 +119,16 @@ new p5((p) => {
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
-      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
-      else drawImageCover(t.imgGray, tileSize, tileSize);
+
+      // desenha com feather usando mask
+      p.push();
+      let imgToDraw = isMain ? t.imgColor : t.imgGray;
+      imgToDraw.mask(featherMask);
+      drawImageCover(imgToDraw, tileSize, tileSize);
+      p.pop();
+
       p.pop();
     }
   };
 });
 </script>
-</body>
-</html>

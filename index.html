@@ -14,7 +14,6 @@
 
 <script>
 new p5((p) => {
-
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -28,8 +27,8 @@ new p5((p) => {
 
   let imgs = [], imgsGray = [], tiles = [];
   const tileSize = 50;
-  const totalTiles = 180; // número fixo
-  const holderWidth = 700, holderHeight = 500;
+  const totalTiles = 180;
+  const canvasW = 700, canvasH = 500;
   let loadedCount = 0;
 
   function drawImageCover(img, w, h){
@@ -46,38 +45,35 @@ new p5((p) => {
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
-  // Carrega imagens
-  fileNames.forEach((url, idx) => {
-    p.loadImage(url, (img) => {
-      imgs[idx] = img;
+  // preload simplificado
+  p.preload = () => {
+    for(let i=0;i<fileNames.length;i++){
+      imgs[i] = p.loadImage(fileNames[i]);
+    }
+  };
 
-      // versão grayscale
+  p.setup = () => {
+    p.createCanvas(canvasW, canvasH).parent("p5-holder");
+
+    // criar grayscale
+    imgs.forEach((img, i) => {
       let g = p.createImage(img.width, img.height);
       g.copy(img,0,0,img.width,img.height,0,0,img.width,img.height);
       g.loadPixels();
-      for(let i=0;i<g.pixels.length;i+=4){
-        let gray = (g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i]=g.pixels[i+1]=g.pixels[i+2]=gray;
+      for(let pIdx=0;pIdx<g.pixels.length;pIdx+=4){
+        let gray = (g.pixels[pIdx]+g.pixels[pIdx+1]+g.pixels[pIdx+2])/3;
+        g.pixels[pIdx] = g.pixels[pIdx+1] = g.pixels[pIdx+2] = gray;
       }
       g.updatePixels();
-      imgsGray[idx] = g;
-
-      loadedCount++;
-      if(loadedCount===fileNames.length) generateTiles();
+      imgsGray[i] = g;
     });
-  });
 
-  p.setup = () => {
-    p.createCanvas(holderWidth, holderHeight).parent("p5-holder");
-  };
-
-  function generateTiles(){
-    tiles = [];
+    // gerar tiles dentro do canvas
     for(let i=0;i<totalTiles;i++){
       const angle = p.random(p.TWO_PI);
       const r = Math.sqrt(p.random());
-      const px = holderWidth/2 + (holderWidth*0.9/2)*r*Math.cos(angle) + 200; // desloca 200px direita
-      const py = holderHeight/2 + (holderHeight*0.7/2)*r*Math.sin(angle) + 500; // desloca 500px baixo
+      const px = canvasW/2 + (canvasW*0.9/2)*r*Math.cos(angle);
+      const py = canvasH/2 + (canvasH*0.7/2)*r*Math.sin(angle);
       tiles.push({
         x:px, y:py,
         imgColor: imgs[i % imgs.length],
@@ -85,12 +81,10 @@ new p5((p) => {
         rot:0, scale:1
       });
     }
-  }
+  };
 
   p.draw = () => {
     p.background(255);
-    if(loadedCount<fileNames.length) return;
-
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       let isMain = false;

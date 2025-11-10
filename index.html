@@ -46,7 +46,7 @@ new p5((p) => {
   let tiles = [];
   let loadedCount = 0;
 
-  function drawImageCover(img, w, h, alpha = 255){
+  function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
     let boxRatio = w / h;
     let drawW = w, drawH = h;
@@ -57,10 +57,8 @@ new p5((p) => {
       drawW = w;
       drawH = drawW / imgRatio;
     }
-    p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha);
+    p.drawingContext.imageSmoothingEnabled = true; // ativa antialiasing
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
-    p.noTint();
   }
 
   fileNames.forEach((url, idx) => {
@@ -111,22 +109,26 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+      const isVisible = d < tileSize*4;
+      if(!isVisible) continue;
 
-      const isMain = d < tileSize * 0.8;    // 60% menor que 2
-      const isVisible = d < tileSize * 4.8;  // 60% menor que 12
+      let isMain = d < tileSize*2;
 
-      const alpha = isVisible ? 255 : 18; // 7% de opacidade fora do alcance
-
-      t.rot = p.lerp(t.rot, isMain ? 0.1 : 0, isMain ? 0.25 : 0.1);
-      t.scale = p.lerp(t.scale, isMain ? 1.45 : 1.0, isMain ? 0.25 : 0.1);
+      if(isMain){
+        t.rot = p.lerp(t.rot, 0.1, 0.25);
+        t.scale = p.lerp(t.scale, 1.45, 0.25);
+      } else {
+        t.rot = p.lerp(t.rot, 0, 0.15);
+        t.scale = p.lerp(t.scale, 0.85, 0.12);
+      }
 
       p.push();
       p.translate(t.x, t.y);
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
-      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize, alpha);
-      else drawImageCover(t.imgGray, tileSize, tileSize, alpha);
+      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+      else drawImageCover(t.imgGray, tileSize, tileSize);
       p.pop();
     }
   };

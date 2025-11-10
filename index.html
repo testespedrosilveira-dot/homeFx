@@ -14,6 +14,7 @@
 
 <script>
 new p5((p) => {
+  // links das imagens no ImageKit
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -35,17 +36,6 @@ new p5((p) => {
   let tiles = [];
   let loadedCount = 0;
 
-  function createFeatherMask(w, h){
-    let mask = p.createGraphics(w, h);
-    mask.noFill();
-    for(let i=0;i<w/2;i++){
-      let alpha = p.map(i,0,w/2,255,0);
-      mask.stroke(255,255,255,alpha);
-      mask.rect(i, i, w-i*2, h-i*2);
-    }
-    return mask;
-  }
-
   function drawImageCover(img, w, h){
     let imgRatio = img.width / img.height;
     let boxRatio = w / h;
@@ -64,7 +54,7 @@ new p5((p) => {
     p.loadImage(url, (img) => {
       imgs[idx] = img;
 
-      // versão grayscale
+      // criar versão grayscale
       let g = p.createImage(img.width, img.height);
       g.copy(img, 0, 0, img.width, img.height, 0, 0, img.width, img.height);
       g.loadPixels();
@@ -86,15 +76,14 @@ new p5((p) => {
 
   function generateTiles(){
     tiles = [];
-    for(let i=0;i<maxTiles;i++){
+    for(let i=0; i<maxTiles; i++){
       const px = p.random(tileSize/2, canvasWidth - tileSize/2);
       const py = p.random(tileSize/2, canvasHeight - tileSize/2);
       tiles.push({
         x:px, y:py,
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
-        rot:0, scale:1,
-        mask: createFeatherMask(tileSize, tileSize)
+        rot:0, scale:1
       });
     }
   }
@@ -124,11 +113,8 @@ new p5((p) => {
       p.rotate(t.rot);
       p.scale(t.scale);
       p.imageMode(p.CENTER);
-
-      let imgToDraw = isMain ? t.imgColor : t.imgGray;
-      imgToDraw.mask(t.mask); // aplica o feather
-      drawImageCover(imgToDraw, tileSize, tileSize);
-
+      if(isMain) drawImageCover(t.imgColor, tileSize, tileSize);
+      else drawImageCover(t.imgGray, tileSize, tileSize);
       p.pop();
     }
   };

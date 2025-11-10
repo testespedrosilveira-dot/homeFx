@@ -57,7 +57,7 @@ new p5((p) => {
       drawW = w;
       drawH = drawW / imgRatio;
     }
-    p.drawingContext.imageSmoothingEnabled = true; // ativa antialiasing
+    p.drawingContext.imageSmoothingEnabled = true;
     p.image(img, -drawW/2, -drawH/2, drawW, drawH);
   }
 
@@ -109,10 +109,10 @@ new p5((p) => {
 
     for(let t of tiles){
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isVisible = d < tileSize*4;
+      const isVisible = d < tileSize*12; // triplicamos a área de influência
       if(!isVisible) continue;
 
-      let isMain = d < tileSize*2;
+      let isMain = d < tileSize*6; // triplicamos também o efeito principal
 
       if(isMain){
         t.rot = p.lerp(t.rot, 0.1, 0.25);

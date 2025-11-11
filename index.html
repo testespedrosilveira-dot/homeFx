@@ -98,7 +98,7 @@
         }
       }
 
-      // Random angle para Yin Yang
+      // Random angle para Yin Yang simplificado
       let yinYangAngle = p.random(p.TWO_PI);
 
       p.setup = () => {
@@ -119,25 +119,18 @@
         p.translate(cx, cy);
         p.rotate(yinYangAngle);
 
-        // Yin
+        // Divisão simples preto/branco
         p.fill(0);
         p.arc(0, 0, r * 2, r * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
 
-        // Yang
         p.fill(255);
         p.arc(0, 0, r * 2, r * 2, p.HALF_PI, 3 * p.HALF_PI, p.PIE);
-
-        // Circulos internos
-        p.fill(0);
-        p.ellipse(0, -r/2, r/2, r/2);
-        p.fill(255);
-        p.ellipse(0, r/2, r/2, r/2);
 
         p.pop();
       }
 
       p.draw = () => {
-        // Fundo Yin Yang
+        // Fundo Yin Yang simplificado
         drawYinYangBackground();
 
         if (loadedCount < fileNames.length) return;

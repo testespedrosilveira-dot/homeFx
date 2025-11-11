@@ -10,7 +10,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      background: white;
+      background: #fff;
       overflow: hidden;
       display: flex;
       justify-content: center;
@@ -95,7 +95,7 @@ new p5((p) => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
     lastMouseX = p.mouseX;
     lastMouseY = p.mouseY;
-    p.background(255); // Inicializa com fundo branco
+    p.background(255); // fundo inicial
   };
 
   p.windowResized = () => {
@@ -106,7 +106,7 @@ new p5((p) => {
   p.draw = () => {
     if (loadedCount < fileNames.length) return;
 
-    // Atualiza distância dos tiles em relação ao cursor
+    // Distâncias dos tiles
     let distances = tiles.map((t, i) => ({
       index: i,
       dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
@@ -126,7 +126,6 @@ new p5((p) => {
       const isMain = d < mainRange;
       const isPartial = partialIndexes.includes(i);
 
-      // Atualiza targets
       if (isMain) {
         t.targetScale = 1.75;
         t.targetRot = Math.random() * 0.2 - 0.1;
@@ -138,7 +137,7 @@ new p5((p) => {
       } else {
         t.targetScale = 1;
         t.targetRot = 0;
-        t.targetAlpha = 20; // cinza leve
+        t.targetAlpha = 15; // cinza leve
       }
 
       const dt = p.deltaTime;
@@ -149,10 +148,11 @@ new p5((p) => {
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
       t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
 
-      // Move suavemente em direção à última posição do cursor
+      // Movimento suave em direção ao cursor
       t.x = p.lerp(t.x, lastMouseX, 0.05);
       t.y = p.lerp(t.y, lastMouseY, 0.05);
 
+      // Desenha tile (acumulando)
       if (t.alpha > 0.1) {
         p.push();
         p.translate(t.x, t.y);

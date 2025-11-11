@@ -32,7 +32,7 @@ new p5((p)=>{
   const maxTiles = 300*3;
   const mainRange = tileSize*3;
   const partialCount = 46;
-  const fadeDuration = 500; // ms do rastro
+  const fadeDuration = 500;
 
   let imgs=[], imgsGray=[], tiles=[], loadedCount=0;
 
@@ -91,11 +91,9 @@ new p5((p)=>{
 
     if(loadedCount<fileNames.length) return;
 
-    // calcular distâncias
     let distances = tiles.map((t,i)=>({index:i, dist:p.dist(p.mouseX,p.mouseY,t.x,t.y)}));
     distances.sort((a,b)=>a.dist-b.dist);
 
-    // 23 mais próximos fora do main
     let partialIndexes=[];
     for(let i=0;i<distances.length;i++){
       if(distances[i].dist>mainRange){
@@ -110,11 +108,11 @@ new p5((p)=>{
       const isPartial = partialIndexes.includes(i);
 
       if(isMain){
-        t.targetScale=1.45;
+        t.targetScale=1.75;   // AUMENTADO
         t.targetRot=Math.random()*0.2-0.1;
         t.targetAlpha=255;
       } else if(isPartial){
-        t.targetScale=0.85;
+        t.targetScale=1.10;   // AUMENTADO
         t.targetRot=Math.random()*0.1-0.05;
         t.targetAlpha=18;
       } else {
@@ -123,7 +121,6 @@ new p5((p)=>{
         t.targetAlpha=0;
       }
 
-      // rastro: interpolação baseada em deltaTime e fadeDuration
       const dt=p.deltaTime;
       const alphaLerp = dt/fadeDuration;
       const scaleLerp = 0.05;

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Rastro Reggae</title>
+  <title>HomeFX Trail Effect - Rastro Reggae Corrigido</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -42,10 +42,11 @@ new p5((p) => {
   const fadeDuration = 500;
   const trailDuration = 500;
 
+  // Cores reggae corrigidas: azul anil, cinza, vermelho
   const reggaeColors = [
-    [0, 128, 0],   // verde
-    [255, 255, 0], // amarelo
-    [255, 0, 0]    // vermelho
+    [75, 0, 130],   // azul anil
+    [128, 128, 128],// cinza
+    [255, 0, 0]     // vermelho
   ];
 
   let imgs = [];
@@ -98,6 +99,7 @@ new p5((p) => {
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+    p.rectMode(p.CENTER);
   };
 
   p.windowResized = () => {
@@ -106,7 +108,10 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    p.background(255);
+    // Fundo translúcido para criar efeito de rastro contínuo
+    p.noStroke();
+    p.fill(255, 20); // leve desbotamento do fundo
+    p.rect(p.width/2, p.height/2, p.width, p.height);
 
     if (loadedCount < fileNames.length) return;
 
@@ -167,7 +172,6 @@ new p5((p) => {
       if (t.trailAlpha > 0.5) {
         p.fill(t.trailColor[0], t.trailColor[1], t.trailColor[2], t.trailAlpha);
         p.noStroke();
-        p.rectMode(p.CENTER);
         p.rect(0, 0, tileSize, tileSize);
       }
 

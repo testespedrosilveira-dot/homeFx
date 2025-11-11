@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Rastro Colorido</title>
+  <title>HomeFX Trail Effect - Rastro Cinza</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -36,7 +36,7 @@
       ];
 
       const tileSize = 60;
-      const maxTiles = 200; // para performance
+      const maxTiles = 200;
       const mainRange = tileSize * 3 * 0.8;
       const partialCount = 46;
       const fadeDuration = 500 + 2000;
@@ -73,6 +73,7 @@
       function generateTiles() {
         tiles = [];
         for (let i = 0; i < maxTiles; i++) {
+          let grayVal = p.random(50, 255); // escala de cinza
           tiles.push({
             x: p.random(tileSize / 2, p.width - tileSize / 2),
             y: p.random(tileSize / 2, p.height - tileSize / 2),
@@ -84,7 +85,7 @@
             targetAlpha: 0,
             targetScale: 1,
             targetRot: 0,
-            colorOverlay: p.color(p.random(255), p.random(255), p.random(255), 0)
+            grayOverlay: p.color(grayVal, grayVal, grayVal, 0)
           });
         }
       }
@@ -99,7 +100,6 @@
       };
 
       p.draw = () => {
-        // Não limpar fundo para manter rastros
         if (loadedCount < fileNames.length) return;
 
         let distances = tiles.map((t, i) => ({
@@ -150,11 +150,11 @@
             p.rotate(t.rot);
             p.scale(t.scale);
 
-            // Overlay colorido proporcional à opacidade do tile
+            // Overlay cinza proporcional à opacidade do tile
             let overlayAlpha = p.map(t.alpha, 0, 255, 0, 120);
-            t.colorOverlay.setAlpha(overlayAlpha);
+            t.grayOverlay.setAlpha(overlayAlpha);
             p.noStroke();
-            p.fill(t.colorOverlay);
+            p.fill(t.grayOverlay);
             p.rectMode(p.CENTER);
             p.rect(0, 0, tileSize, tileSize);
 

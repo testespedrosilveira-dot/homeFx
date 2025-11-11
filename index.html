@@ -5,11 +5,11 @@
 <title>HomeFX Trail Colorido</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <style>
-  html, body {
-    margin:0; padding:0; width:100%; height:100%; background:white; overflow:hidden;
-    display:flex; justify-content:center; align-items:center;
-  }
-  #p5-holder { width:100%; height:100%; }
+html, body {
+  margin:0; padding:0; width:100%; height:100%; background:white; overflow:hidden;
+  display:flex; justify-content:center; align-items:center;
+}
+#p5-holder { width:100%; height:100%; }
 </style>
 </head>
 <body>
@@ -25,22 +25,35 @@ new p5((p)=>{
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Kit_camisa_alta.jpg?updatedAt=1762880812941",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/new01.png?updatedAt=1762880813205"
   ];
 
   const tileSize = 60;
-  const maxTiles = 450; 
-  const mainRange = tileSize * 3 * 0.8;   
+  const maxTiles = 450;
+  const mainRange = tileSize * 3 * 0.8;
   const partialCount = 46;
   const fadeDuration = 500;
+  const trailColors = ["#FF3B3B","#FFB93B","#3BFFB9","#3B9BFF","#B93BFF","#FF6EB4","#6EFFA1","#FFA16E"];
 
-  let imgs = [], tiles = [], loadedCount = 0;
-  const trailColors = ["#FF3B3B","#FFB93B","#3BFFB9","#3B9BFF","#B93BFF"]; // cores sólidas
+  let imgs = [], imgsGray = [], tiles = [], loadedCount = 0;
 
-  // Preload das imagens
+  // Preload otimizado
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
+      let g = img.get();
+      g.filter(p.GRAY);
+      imgsGray[idx] = g;
       loadedCount++;
       if (loadedCount === fileNames.length) generateTiles();
     });
@@ -64,7 +77,8 @@ new p5((p)=>{
       tiles.push({
         x:p.random(tileSize/2,p.width-tileSize/2),
         y:p.random(tileSize/2,p.height-tileSize/2),
-        img: imgs[i%imgs.length],
+        imgColor: imgs[i%imgs.length],
+        imgGray: imgsGray[i%imgsGray.length],
         rot:0, scale:1,
         alpha:0,
         targetAlpha:0,
@@ -75,12 +89,12 @@ new p5((p)=>{
     }
   }
 
-  p.setup=()=>p.createCanvas(p.windowWidth,p.windowHeight).parent("p5-holder");
-  p.windowResized=()=>{ p.resizeCanvas(p.windowWidth,p.windowHeight); generateTiles(); }
+  p.setup = () => p.createCanvas(p.windowWidth,p.windowHeight).parent("p5-holder");
+  p.windowResized = () => { p.resizeCanvas(p.windowWidth,p.windowHeight); generateTiles(); }
 
-  p.draw=()=>{
+  p.draw = () => {
     p.background(255);
-    if(loadedCount<fileNames.length) return;
+    if(loadedCount < fileNames.length) return;
 
     let distances = tiles.map((t,i)=>({index:i, dist:p.dist(p.mouseX,p.mouseY,t.x,t.y)}));
     distances.sort((a,b)=>a.dist-b.dist);
@@ -105,14 +119,14 @@ new p5((p)=>{
       } else if(isPartial){
         t.targetScale=1.10;
         t.targetRot=Math.random()*0.1-0.05;
-        t.targetAlpha=80; // alpha do rastro
+        t.targetAlpha=60; // alpha do rastro
       } else {
         t.targetScale=1;
         t.targetRot=0;
         t.targetAlpha=0;
       }
 
-      const dt=p.deltaTime;
+      const dt = p.deltaTime;
       const alphaLerp = dt / (fadeDuration * 0.7);
       const scaleLerp = 0.08;
 
@@ -120,7 +134,7 @@ new p5((p)=>{
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
       t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
 
-      if(t.alpha>0.1){
+      if(t.alpha > 0.1){
         p.push();
         p.translate(t.x,t.y);
         p.rotate(t.rot);
@@ -128,11 +142,13 @@ new p5((p)=>{
         p.imageMode(p.CENTER);
 
         if(isMain){
-          drawImageCover(t.img,tileSize,tileSize,t.alpha);
+          drawImageCover(t.imgColor, tileSize, tileSize, t.alpha);
         } else if(t.alpha>10){
-          // Rastro colorido sólido
+          // Rastro colorido com cores aleatórias
+          const col = p.color(trailColors[Math.floor(p.random(trailColors.length))]);
+          col.setAlpha(t.alpha);
           p.noStroke();
-          p.fill(t.trailColor,t.alpha);
+          p.fill(col);
           p.rectMode(p.CENTER);
           p.rect(0,0,tileSize,tileSize,8);
         }

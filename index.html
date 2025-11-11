@@ -49,7 +49,7 @@
       const maxTiles = 450;
       const mainRange = tileSize * 3 * 0.8;
       const partialCount = 46;
-      const fadeDuration = 500 + 2000; // +2 segundos
+      const fadeDuration = 500 + 2000; // duração longa do rastro
 
       let imgs = [];
       let imgsGray = [];
@@ -68,7 +68,6 @@
         });
       });
 
-      // Função para desenhar imagem com ajuste de proporção
       function drawImageCover(img, w, h, alpha = 255) {
         let ratio = img.width / img.height;
         let boxRatio = w / h;
@@ -109,7 +108,7 @@
       };
 
       p.draw = () => {
-        p.background(255);
+        p.background(255); // fundo branco
 
         if (loadedCount < fileNames.length) return;
 
@@ -148,7 +147,9 @@
           }
 
           const dt = p.deltaTime;
-          const alphaLerp = dt / (fadeDuration * 0.7); // fade mais lento
+
+          // velocidade de aparição aumentada: alpha aparece mais rápido
+          const alphaLerp = dt / 200; // menor valor = mais rápido aparecer
           const scaleLerp = 0.08;
 
           t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);

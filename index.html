@@ -42,13 +42,14 @@ new p5((p) => {
     p.fill(255);
     p.arc(0, 0, r*2, r*2, p.HALF_PI, p.TWO_PI - p.HALF_PI, p.PIE);
 
-    // Círculo menor central preto (na metade branca)
+    // Círculos menores centrais (agora 3x maior)
+    let smallR = r * 1.5; // antes era r, agora triplica
+    // Círculo menor preto (na metade branca)
     p.fill(0);
-    p.ellipse(0, -r/2, r, r);
-
-    // Círculo menor central branco (na metade preta)
+    p.ellipse(0, -r/2, smallR, smallR);
+    // Círculo menor branco (na metade preta)
     p.fill(255);
-    p.ellipse(0, r/2, r, r);
+    p.ellipse(0, r/2, smallR, smallR);
 
     p.pop();
   }
@@ -140,8 +141,8 @@ new p5((p) => {
     // --- atualizar rotação do fundo suavemente ---
     let dx = p.mouseX - p.width / 2;
     let dy = p.mouseY - p.height / 2;
-    let targetRot = p.atan2(dy, dx) * 0.05; // fator 0.05 para suavidade sutil
-    rot = p.lerp(rot, targetRot, 0.01); // lerp bem suave
+    let targetRot = p.atan2(dy, dx) * 0.05;
+    rot = p.lerp(rot, targetRot, 0.01);
 
     // --- desenhar fundo Yin Yang ---
     drawYinYang(p.width / 2, p.height / 2, Math.min(p.width, p.height) * 0.25);

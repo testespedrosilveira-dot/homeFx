@@ -25,28 +25,37 @@ new p5((p)=>{
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
+
+    // ✅ Novas imagens adicionadas
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/Kit_camisa_alta.jpg?updatedAt=1762880812941",
+    "https://ik.imagekit.io/q3d43lw6h/new%20site/new01.png?updatedAt=1762880813205"
   ];
 
   const tileSize = 60;
   const maxTiles = 450; 
-  const mainRange = tileSize * 3 * 0.8;   // ✅ 20% menor
+  const mainRange = tileSize * 3 * 0.8;   
   const partialCount = 46;
   const fadeDuration = 500;
 
   let imgs = [], imgsGray = [], tiles = [], loadedCount = 0;
 
-  // ✅ PRELOAD OTIMIZADO (rápido e sem quebrar nada)
+  // ✅ PRELOAD OTIMIZADO
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
-
       imgs[idx] = img;
-
-      // ✅ grayscale instantâneo (sem pixel por pixel)
       let g = img.get();
       g.filter(p.GRAY);
       imgsGray[idx] = g;
-
       loadedCount++;
       if (loadedCount === fileNames.length) generateTiles();
     });
@@ -86,7 +95,6 @@ new p5((p)=>{
 
   p.draw=()=>{
     p.background(255);
-
     if(loadedCount<fileNames.length) return;
 
     let distances = tiles.map((t,i)=>({index:i, dist:p.dist(p.mouseX,p.mouseY,t.x,t.y)}));
@@ -120,7 +128,6 @@ new p5((p)=>{
       }
 
       const dt=p.deltaTime;
-
       const alphaLerp = dt / (fadeDuration * 0.7);
       const scaleLerp = 0.08;
 

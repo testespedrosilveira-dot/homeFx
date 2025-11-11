@@ -57,10 +57,8 @@
       let tiles = [];
       let loadedCount = 0;
 
-      let rot = 0; // rotação do fundo
-      let waveOffset = 0; // leve ondulação
+      let rot = 0;
 
-      // Preload imagens
       fileNames.forEach((url, idx) => {
         p.loadImage(url, img => {
           imgs[idx] = img;
@@ -116,21 +114,21 @@
         p.translate(p.width / 2, p.height / 2);
         p.rotate(rot);
 
-        const radius = Math.min(p.width, p.height) * 0.25 * 1.2; // +20%
-        const alphaPassive = 18;
+        const radius = Math.min(p.width, p.height) * 0.25 * 1.2;
+        const alphaPassive = 18; // mesma opacidade dos retângulos passivos
 
         p.noStroke();
 
-        // Parte superior
+        // Parte branca
         p.fill(255, alphaPassive);
         p.arc(0, 0, radius * 2, radius * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
 
-        // Parte inferior
+        // Parte preta
         p.fill(0, alphaPassive);
         p.arc(0, 0, radius * 2, radius * 2, p.HALF_PI, p.TWO_PI - p.HALF_PI, p.PIE);
 
-        // Elipses internas (pequenas)
-        const smallR = radius * 0.33 * 3; // triplo do anterior
+        // Pequenas elipses internas (triplicadas)
+        const smallR = radius * 0.33 * 3;
         p.fill(0, alphaPassive);
         p.ellipse(0, -radius / 2, smallR, smallR);
         p.fill(255, alphaPassive);
@@ -142,11 +140,11 @@
       p.draw = () => {
         p.background(255);
 
-        // Rotação suave seguindo cursor
+        // Rotação suave do símbolo em direção ao cursor
         const dx = p.mouseX - p.width / 2;
         const dy = p.mouseY - p.height / 2;
-        const targetRot = p.atan2(dy, dx) * 0.02; // leve
-        rot = p.lerp(rot, targetRot, 0.02); // suavidade
+        const targetRot = p.atan2(dy, dx) * 0.03;
+        rot = p.lerp(rot, targetRot, 0.02);
 
         drawYinYang();
 

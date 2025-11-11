@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Liquid Blur</title>
+  <title>HomeFX Trail Effect - Permanent Blur</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -49,6 +49,7 @@ new p5((p) => {
   let lastMouseX = 0;
   let lastMouseY = 0;
 
+  // Preload imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
@@ -105,7 +106,7 @@ new p5((p) => {
   p.draw = () => {
     if (loadedCount < fileNames.length) return;
 
-    // Tiles seguem suavemente o cursor
+    // Distâncias dos tiles
     let distances = tiles.map((t, i) => ({
       index: i,
       dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
@@ -125,7 +126,6 @@ new p5((p) => {
       const isMain = d < mainRange;
       const isPartial = partialIndexes.includes(i);
 
-      // Configuração de alpha e escala
       if (isMain) {
         t.targetScale = 1.75;
         t.targetRot = Math.random() * 0.2 - 0.1;
@@ -133,11 +133,11 @@ new p5((p) => {
       } else if (isPartial) {
         t.targetScale = 1.10;
         t.targetRot = Math.random() * 0.1 - 0.05;
-        t.targetAlpha = 25;
+        t.targetAlpha = 25; // cinza translucido
       } else {
         t.targetScale = 1;
-        t.targetRot = Math.random() * 0.02 - 0.01;
-        t.targetAlpha = 20;
+        t.targetRot = 0;
+        t.targetAlpha = 15; // cinza leve
       }
 
       const dt = p.deltaTime;
@@ -148,12 +148,11 @@ new p5((p) => {
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
       t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
 
-      // Movimento tipo "smear" / liquid blur
-      const randomOffsetX = p.random(-1.5, 1.5);
-      const randomOffsetY = p.random(-1.5, 1.5);
-      t.x = p.lerp(t.x, lastMouseX + randomOffsetX, 0.05);
-      t.y = p.lerp(t.y, lastMouseY + randomOffsetY, 0.05);
+      // Movimento suave em direção ao cursor
+      t.x = p.lerp(t.x, lastMouseX, 0.05);
+      t.y = p.lerp(t.y, lastMouseY, 0.05);
 
+      // Desenha tile (acumulando)
       if (t.alpha > 0.1) {
         p.push();
         p.translate(t.x, t.y);
@@ -168,11 +167,6 @@ new p5((p) => {
     // Atualiza posição do cursor suavemente
     lastMouseX = p.lerp(lastMouseX, p.mouseX, 0.1);
     lastMouseY = p.lerp(lastMouseY, p.mouseY, 0.1);
-
-    // camada de semi-transparência leve para dar “smear” contínuo
-    p.fill(255, 5); 
-    p.noStroke();
-    p.rect(0, 0, p.width, p.height);
   };
 });
 </script>

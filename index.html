@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>HomeFX Trail Effect</title>
+<title>HomeFX Trail Colorido</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
 <style>
   html, body {
@@ -35,9 +35,9 @@ new p5((p)=>{
   const fadeDuration = 500;
 
   let imgs = [], tiles = [], loadedCount = 0;
-  const trailColors = ["#FF3B3B","#FFB93B","#3BFFB9","#3B9BFF","#B93BFF"]; // cores sólidas para rastro
+  const trailColors = ["#FF3B3B","#FFB93B","#3BFFB9","#3B9BFF","#B93BFF"]; // cores sólidas
 
-  // Preload otimizado
+  // Preload das imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
@@ -70,7 +70,7 @@ new p5((p)=>{
         targetAlpha:0,
         targetScale:1,
         targetRot:0,
-        trailColor: trailColors[i % trailColors.length] // define cor do rastro
+        trailColor: trailColors[i % trailColors.length]
       });
     }
   }
@@ -130,11 +130,11 @@ new p5((p)=>{
         if(isMain){
           drawImageCover(t.img,tileSize,tileSize,t.alpha);
         } else if(t.alpha>10){
-          // Rastro sólido colorido
+          // Rastro colorido sólido
           p.noStroke();
           p.fill(t.trailColor,t.alpha);
           p.rectMode(p.CENTER);
-          p.rect(0,0,tileSize,tileSize,8); // cantos arredondados
+          p.rect(0,0,tileSize,tileSize,8);
         }
 
         p.pop();

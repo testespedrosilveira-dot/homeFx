@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Motion Blur</title>
+  <title>HomeFX Trail Effect - Permanent Blur</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -95,6 +95,7 @@ new p5((p) => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
     lastMouseX = p.mouseX;
     lastMouseY = p.mouseY;
+    p.background(255); // Inicializa com fundo branco
   };
 
   p.windowResized = () => {
@@ -103,13 +104,9 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    // fundo semi-transparente para motion blur
-    p.noStroke();
-    p.fill(255, 13); // 5% de opacidade (~13/255)
-    p.rect(0, 0, p.width, p.height);
-
     if (loadedCount < fileNames.length) return;
 
+    // Atualiza distância dos tiles em relação ao cursor
     let distances = tiles.map((t, i) => ({
       index: i,
       dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
@@ -129,6 +126,7 @@ new p5((p) => {
       const isMain = d < mainRange;
       const isPartial = partialIndexes.includes(i);
 
+      // Atualiza targets
       if (isMain) {
         t.targetScale = 1.75;
         t.targetRot = Math.random() * 0.2 - 0.1;
@@ -136,14 +134,13 @@ new p5((p) => {
       } else if (isPartial) {
         t.targetScale = 1.10;
         t.targetRot = Math.random() * 0.1 - 0.05;
-        t.targetAlpha = 18;
+        t.targetAlpha = 25; // cinza translucido
       } else {
         t.targetScale = 1;
         t.targetRot = 0;
-        t.targetAlpha = 0;
+        t.targetAlpha = 20; // cinza leve
       }
 
-      // interpola alpha, scale e rot
       const dt = p.deltaTime;
       const alphaLerp = dt / (fadeDuration * 0.7);
       const scaleLerp = 0.08;
@@ -152,7 +149,7 @@ new p5((p) => {
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
       t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
 
-      // movimento em direção à última posição do cursor
+      // Move suavemente em direção à última posição do cursor
       t.x = p.lerp(t.x, lastMouseX, 0.05);
       t.y = p.lerp(t.y, lastMouseY, 0.05);
 
@@ -167,7 +164,7 @@ new p5((p) => {
       }
     });
 
-    // atualiza última posição do cursor
+    // Atualiza posição do cursor suavemente
     lastMouseX = p.lerp(lastMouseX, p.mouseX, 0.1);
     lastMouseY = p.lerp(lastMouseY, p.mouseY, 0.1);
   };

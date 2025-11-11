@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Yin Yang BG</title>
+  <title>HomeFX Trail Effect</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -10,7 +10,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      background: #fff; /* fundo branco */
+      background: white;
       overflow: hidden;
       display: flex;
       justify-content: center;
@@ -24,6 +24,36 @@
 <script>
 new p5((p) => {
 
+  // --- Fundo Yin Yang ---
+  let rot = 0;
+
+  function drawYinYang(cx, cy, radius) {
+    p.push();
+    p.translate(cx, cy);
+    p.rotate(rot); // aplicar rotação suave
+    let r = radius;
+
+    // Metade superior preta
+    p.fill(0);
+    p.noStroke();
+    p.arc(0, 0, r*2, r*2, -p.HALF_PI, p.HALF_PI, p.PIE);
+
+    // Metade inferior branca
+    p.fill(255);
+    p.arc(0, 0, r*2, r*2, p.HALF_PI, p.TWO_PI - p.HALF_PI, p.PIE);
+
+    // Círculo menor central preto (na metade branca)
+    p.fill(0);
+    p.ellipse(0, -r/2, r, r);
+
+    // Círculo menor central branco (na metade preta)
+    p.fill(255);
+    p.ellipse(0, r/2, r, r);
+
+    p.pop();
+  }
+
+  // --- Rastro e imagens ---
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -38,7 +68,6 @@ new p5((p) => {
     "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
@@ -56,9 +85,6 @@ new p5((p) => {
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
-
-  let yinYangAngle = 0;       // ângulo atual
-  const rotationSpeed = 0.02; // suavidade da rotação
 
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
@@ -101,40 +127,6 @@ new p5((p) => {
     }
   }
 
-  function drawYinYangBackground() {
-    let cx = p.width / 2;
-    let cy = p.height / 2;
-    let r = Math.min(p.width, p.height) / 2;
-
-    // calcular ângulo alvo baseado na posição do cursor
-    let targetAngle = p.atan2(p.mouseY - cy, p.mouseX - cx);
-
-    // suavizar rotação
-    yinYangAngle = p.lerp(yinYangAngle, targetAngle, rotationSpeed);
-
-    p.push();
-    p.translate(cx, cy);
-    p.rotate(yinYangAngle);
-    p.noStroke();
-
-    // metade preta
-    p.fill(0);
-    p.arc(0, 0, r * 2, r * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
-
-    // metade branca
-    p.fill(255);
-    p.arc(0, 0, r * 2, r * 2, p.HALF_PI, 3 * p.HALF_PI, p.PIE);
-
-    // esferas internas
-    let smallR = r / 3;
-    p.fill(0);
-    p.ellipse(0, -r / 2, smallR * 1.5, smallR * 1.5);
-    p.fill(255);
-    p.ellipse(0, r / 2, smallR * 1.5, smallR * 1.5);
-
-    p.pop();
-  }
-
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
   };
@@ -145,8 +137,14 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    p.background(255);
-    drawYinYangBackground();
+    // --- atualizar rotação do fundo suavemente ---
+    let dx = p.mouseX - p.width / 2;
+    let dy = p.mouseY - p.height / 2;
+    let targetRot = p.atan2(dy, dx) * 0.05; // fator 0.05 para suavidade sutil
+    rot = p.lerp(rot, targetRot, 0.01); // lerp bem suave
+
+    // --- desenhar fundo Yin Yang ---
+    drawYinYang(p.width / 2, p.height / 2, Math.min(p.width, p.height) * 0.25);
 
     if (loadedCount < fileNames.length) return;
 
@@ -154,7 +152,6 @@ new p5((p) => {
       index: i,
       dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
     }));
-
     distances.sort((a, b) => a.dist - b.dist);
 
     let partialIndexes = [];
@@ -176,7 +173,7 @@ new p5((p) => {
         t.targetAlpha = 255;
       } else if (isPartial) {
         t.targetScale = 1.10;
-        t.targetRot = Math.random() * 0.1 - 0.005;
+        t.targetRot = Math.random() * 0.1 - 0.05;
         t.targetAlpha = 18;
       } else {
         t.targetScale = 1;

@@ -30,11 +30,27 @@ new p5((p)=>{
 
   const tileSize = 60;
   const maxTiles = 450; 
-  const mainRange = tileSize * 3 * 0.8;   // ✅ range reduzido em 20%
+  const mainRange = tileSize * 3 * 0.8;   // ✅ 20% menor
   const partialCount = 46;
   const fadeDuration = 500;
 
-  let imgs=[], imgsGray=[], tiles=[], loadedCount=0;
+  let imgs = [], imgsGray = [], tiles = [], loadedCount = 0;
+
+  // ✅ PRELOAD OTIMIZADO (rápido e sem quebrar nada)
+  fileNames.forEach((url, idx) => {
+    p.loadImage(url, img => {
+
+      imgs[idx] = img;
+
+      // ✅ grayscale instantâneo (sem pixel por pixel)
+      let g = img.get();
+      g.filter(p.GRAY);
+      imgsGray[idx] = g;
+
+      loadedCount++;
+      if (loadedCount === fileNames.length) generateTiles();
+    });
+  });
 
   function drawImageCover(img,w,h,alpha=255){
     let ratio=img.width/img.height;
@@ -47,23 +63,6 @@ new p5((p)=>{
     p.image(img,-drawW/2,-drawH/2,drawW,drawH);
     p.noTint();
   }
-
-  fileNames.forEach((url,idx)=>{
-    p.loadImage(url,(img)=>{
-      imgs[idx]=img;
-      let g=p.createImage(img.width,img.height);
-      g.copy(img,0,0,img.width,img.height,0,0,img.width,img.height);
-      g.loadPixels();
-      for(let i=0;i<g.pixels.length;i+=4){
-        let gray=(g.pixels[i]+g.pixels[i+1]+g.pixels[i+2])/3;
-        g.pixels[i]=g.pixels[i+1]=g.pixels[i+2]=gray;
-      }
-      g.updatePixels();
-      imgsGray[idx]=g;
-      loadedCount++;
-      if(loadedCount===fileNames.length) generateTiles();
-    });
-  });
 
   function generateTiles(){
     tiles=[];
@@ -122,8 +121,8 @@ new p5((p)=>{
 
       const dt=p.deltaTime;
 
-      const alphaLerp = dt / (fadeDuration * 0.7); // ✅ mais fluido
-      const scaleLerp = 0.08;                      // ✅ resposta mais suave
+      const alphaLerp = dt / (fadeDuration * 0.7);
+      const scaleLerp = 0.08;
 
       t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);

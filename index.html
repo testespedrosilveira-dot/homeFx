@@ -32,7 +32,6 @@
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
-        // Novas imagens
         "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
         "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
         "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
@@ -56,7 +55,6 @@
       let imgsGray = [];
       let tiles = [];
       let loadedCount = 0;
-      const bgColor = '#37551f'; // fundo fixo
 
       // Preload imagens
       fileNames.forEach((url, idx) => {
@@ -100,6 +98,9 @@
         }
       }
 
+      // Random angle para Yin Yang
+      let yinYangAngle = p.random(p.TWO_PI);
+
       p.setup = () => {
         p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
       };
@@ -109,8 +110,35 @@
         generateTiles();
       };
 
+      function drawYinYangBackground() {
+        let cx = p.width / 2;
+        let cy = p.height / 2;
+        let r = Math.min(p.width, p.height) / 2;
+
+        p.push();
+        p.translate(cx, cy);
+        p.rotate(yinYangAngle);
+
+        // Yin
+        p.fill(0);
+        p.arc(0, 0, r * 2, r * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
+
+        // Yang
+        p.fill(255);
+        p.arc(0, 0, r * 2, r * 2, p.HALF_PI, 3 * p.HALF_PI, p.PIE);
+
+        // Circulos internos
+        p.fill(0);
+        p.ellipse(0, -r/2, r/2, r/2);
+        p.fill(255);
+        p.ellipse(0, r/2, r/2, r/2);
+
+        p.pop();
+      }
+
       p.draw = () => {
-        p.background(bgColor);
+        // Fundo Yin Yang
+        drawYinYangBackground();
 
         if (loadedCount < fileNames.length) return;
 

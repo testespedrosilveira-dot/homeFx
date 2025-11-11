@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect</title>
+  <title>HomeFX Trail Effect - Yin Yang BG</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -10,6 +10,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
+      background: #000; /* fallback */
       overflow: hidden;
       display: flex;
       justify-content: center;
@@ -56,6 +57,9 @@
       let tiles = [];
       let loadedCount = 0;
 
+      // random angle do Yin Yang
+      const yinYangAngle = p.random(p.TWO_PI);
+
       // Preload imagens
       fileNames.forEach((url, idx) => {
         p.loadImage(url, img => {
@@ -68,6 +72,7 @@
         });
       });
 
+      // Função para desenhar imagem com ajuste de proporção
       function drawImageCover(img, w, h, alpha = 255) {
         let ratio = img.width / img.height;
         let boxRatio = w / h;
@@ -98,8 +103,27 @@
         }
       }
 
-      // Random angle para Yin Yang simplificado
-      let yinYangAngle = p.random(p.TWO_PI);
+      function drawYinYangBackground() {
+        let cx = p.width / 2;
+        let cy = p.height / 2;
+        let r = Math.min(p.width, p.height) / 2;
+
+        p.push();
+        p.translate(cx, cy);
+        p.rotate(yinYangAngle);
+
+        p.noStroke(); // remove qualquer contorno
+
+        // metade preta
+        p.fill(0);
+        p.arc(0, 0, r * 2, r * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
+
+        // metade branca
+        p.fill(255);
+        p.arc(0, 0, r * 2, r * 2, p.HALF_PI, 3 * p.HALF_PI, p.PIE);
+
+        p.pop();
+      }
 
       p.setup = () => {
         p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
@@ -110,28 +134,8 @@
         generateTiles();
       };
 
-      function drawYinYangBackground() {
-        let cx = p.width / 2;
-        let cy = p.height / 2;
-        let r = Math.min(p.width, p.height) / 2;
-
-        p.push();
-        p.translate(cx, cy);
-        p.rotate(yinYangAngle);
-
-        // Divisão simples preto/branco
-        p.fill(0);
-        p.arc(0, 0, r * 2, r * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
-
-        p.fill(255);
-        p.arc(0, 0, r * 2, r * 2, p.HALF_PI, 3 * p.HALF_PI, p.PIE);
-
-        p.pop();
-      }
-
       p.draw = () => {
-        // Fundo Yin Yang simplificado
-        drawYinYangBackground();
+        drawYinYangBackground(); // fundo Yin Yang
 
         if (loadedCount < fileNames.length) return;
 

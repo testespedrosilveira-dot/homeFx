@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Rastro Cinza</title>
+  <title>HomeFX Trail Effect - Rastro Reggae</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -20,155 +20,164 @@
   </style>
 </head>
 <body>
-  <div id="p5-holder"></div>
-  <script>
-    new p5((p) => {
+<div id="p5-holder"></div>
+<script>
+new p5((p) => {
 
-      const fileNames = [
-        "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
-        "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
-        "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
-        "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
-        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
-        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
-      ];
+  const fileNames = [
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+  ];
 
-      const tileSize = 60;
-      const maxTiles = 450;
-      const mainRange = tileSize * 3 * 0.8;
-      const partialCount = 46;
-      const fadeDuration = 500; // controle do aparecimento
-      const trailDuration = 500; // meio segundo para desaparecer o rastro
+  const tileSize = 60;
+  const maxTiles = 450;
+  const mainRange = tileSize * 3 * 0.8;
+  const partialCount = 46;
+  const fadeDuration = 500;
+  const trailDuration = 500;
 
-      let imgs = [];
-      let imgsGray = [];
-      let tiles = [];
-      let loadedCount = 0;
+  const reggaeColors = [
+    [0, 128, 0],   // verde
+    [255, 255, 0], // amarelo
+    [255, 0, 0]    // vermelho
+  ];
 
-      fileNames.forEach((url, idx) => {
-        p.loadImage(url, img => {
-          imgs[idx] = img;
-          let g = img.get();
-          g.filter(p.GRAY);
-          imgsGray[idx] = g;
-          loadedCount++;
-          if (loadedCount === fileNames.length) generateTiles();
-        });
-      });
+  let imgs = [];
+  let imgsGray = [];
+  let tiles = [];
+  let loadedCount = 0;
 
-      function drawImageCover(img, w, h, alpha = 255) {
-        let ratio = img.width / img.height;
-        let boxRatio = w / h;
-        let drawW = w, drawH = h;
-        if (ratio > boxRatio) { drawH = h; drawW = ratio * drawH; }
-        else { drawW = w; drawH = drawW / ratio; }
-        p.drawingContext.imageSmoothingEnabled = true;
-        p.tint(255, alpha);
-        p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
-        p.noTint();
-      }
-
-      function generateTiles() {
-        tiles = [];
-        for (let i = 0; i < maxTiles; i++) {
-          tiles.push({
-            x: p.random(tileSize / 2, p.width - tileSize / 2),
-            y: p.random(tileSize / 2, p.height - tileSize / 2),
-            imgColor: imgs[i % imgs.length],
-            imgGray: imgsGray[i % imgsGray.length],
-            rot: 0,
-            scale: 1,
-            alpha: 0,
-            targetAlpha: 0,
-            targetScale: 1,
-            targetRot: 0,
-            trailAlpha: 0 // alpha do rastro cinza
-          });
-        }
-      }
-
-      p.setup = () => {
-        p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-      };
-
-      p.windowResized = () => {
-        p.resizeCanvas(p.windowWidth, p.windowHeight);
-        generateTiles();
-      };
-
-      p.draw = () => {
-        p.background(255);
-
-        if (loadedCount < fileNames.length) return;
-
-        let distances = tiles.map((t, i) => ({
-          index: i,
-          dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
-        }));
-        distances.sort((a, b) => a.dist - b.dist);
-
-        let partialIndexes = [];
-        for (let i = 0; i < distances.length; i++) {
-          if (distances[i].dist > mainRange) {
-            partialIndexes.push(distances[i].index);
-            if (partialIndexes.length >= partialCount) break;
-          }
-        }
-
-        tiles.forEach((t, i) => {
-          const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-          const isMain = d < mainRange;
-          const isPartial = partialIndexes.includes(i);
-
-          if (isMain) {
-            t.targetScale = 1.75;
-            t.targetRot = p.random(-0.1, 0.1);
-            t.targetAlpha = 255;
-            t.trailAlpha = 100; // rastro inicial quando ativo
-          } else if (isPartial) {
-            t.targetScale = 1.10;
-            t.targetRot = p.random(-0.05, 0.05);
-            t.targetAlpha = 18;
-            t.trailAlpha = 20;
-          } else {
-            t.targetScale = 1;
-            t.targetRot = 0;
-            t.targetAlpha = 0;
-          }
-
-          const dt = p.deltaTime;
-          const alphaLerp = dt / (fadeDuration * 0.7);
-          const scaleLerp = 0.08;
-          const trailLerp = dt / trailDuration;
-
-          t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
-          t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
-          t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
-          t.trailAlpha = p.lerp(t.trailAlpha, 0, trailLerp); // desaparece o rastro em 0.5s
-
-          p.push();
-          p.translate(t.x, t.y);
-          p.rotate(t.rot);
-          p.scale(t.scale);
-          p.imageMode(p.CENTER);
-
-          // desenha rastro cinza primeiro
-          if (t.trailAlpha > 0.5) {
-            p.fill(150, t.trailAlpha); // cinza
-            p.noStroke();
-            p.rectMode(p.CENTER);
-            p.rect(0, 0, tileSize, tileSize);
-          }
-
-          // desenha o tile colorido/cinza
-          if (t.alpha > 0.1) drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
-
-          p.pop();
-        });
-      };
+  fileNames.forEach((url, idx) => {
+    p.loadImage(url, img => {
+      imgs[idx] = img;
+      let g = img.get();
+      g.filter(p.GRAY);
+      imgsGray[idx] = g;
+      loadedCount++;
+      if (loadedCount === fileNames.length) generateTiles();
     });
-  </script>
+  });
+
+  function drawImageCover(img, w, h, alpha = 255) {
+    let ratio = img.width / img.height;
+    let boxRatio = w / h;
+    let drawW = w, drawH = h;
+    if (ratio > boxRatio) { drawH = h; drawW = ratio * drawH; }
+    else { drawW = w; drawH = drawW / ratio; }
+    p.drawingContext.imageSmoothingEnabled = true;
+    p.tint(255, alpha);
+    p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
+    p.noTint();
+  }
+
+  function generateTiles() {
+    tiles = [];
+    for (let i = 0; i < maxTiles; i++) {
+      tiles.push({
+        x: p.random(tileSize / 2, p.width - tileSize / 2),
+        y: p.random(tileSize / 2, p.height - tileSize / 2),
+        imgColor: imgs[i % imgs.length],
+        imgGray: imgsGray[i % imgsGray.length],
+        rot: 0,
+        scale: 1,
+        alpha: 0,
+        targetAlpha: 0,
+        targetScale: 1,
+        targetRot: 0,
+        trailAlpha: 0,
+        trailColor: reggaeColors[p.floor(p.random(reggaeColors.length))]
+      });
+    }
+  }
+
+  p.setup = () => {
+    p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+  };
+
+  p.windowResized = () => {
+    p.resizeCanvas(p.windowWidth, p.windowHeight);
+    generateTiles();
+  };
+
+  p.draw = () => {
+    p.background(255);
+
+    if (loadedCount < fileNames.length) return;
+
+    let distances = tiles.map((t, i) => ({
+      index: i,
+      dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
+    }));
+    distances.sort((a, b) => a.dist - b.dist);
+
+    let partialIndexes = [];
+    for (let i = 0; i < distances.length; i++) {
+      if (distances[i].dist > mainRange) {
+        partialIndexes.push(distances[i].index);
+        if (partialIndexes.length >= partialCount) break;
+      }
+    }
+
+    tiles.forEach((t, i) => {
+      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+      const isMain = d < mainRange;
+      const isPartial = partialIndexes.includes(i);
+
+      if (isMain) {
+        t.targetScale = 1.75;
+        t.targetRot = p.random(-0.1, 0.1);
+        t.targetAlpha = 255;
+        t.trailAlpha = 150;
+        t.trailColor = reggaeColors[p.floor(p.random(reggaeColors.length))];
+      } else if (isPartial) {
+        t.targetScale = 1.10;
+        t.targetRot = p.random(-0.05, 0.05);
+        t.targetAlpha = 18;
+        t.trailAlpha = 60;
+        t.trailColor = reggaeColors[p.floor(p.random(reggaeColors.length))];
+      } else {
+        t.targetScale = 1;
+        t.targetRot = 0;
+        t.targetAlpha = 0;
+      }
+
+      const dt = p.deltaTime;
+      const alphaLerp = dt / (fadeDuration * 0.7);
+      const scaleLerp = 0.08;
+      const trailLerp = dt / trailDuration;
+
+      t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
+      t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
+      t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
+      t.trailAlpha = p.lerp(t.trailAlpha, 0, trailLerp);
+
+      p.push();
+      p.translate(t.x, t.y);
+      p.rotate(t.rot);
+      p.scale(t.scale);
+      p.imageMode(p.CENTER);
+
+      // desenha rastro reggae
+      if (t.trailAlpha > 0.5) {
+        p.fill(t.trailColor[0], t.trailColor[1], t.trailColor[2], t.trailAlpha);
+        p.noStroke();
+        p.rectMode(p.CENTER);
+        p.rect(0, 0, tileSize, tileSize);
+      }
+
+      // desenha o tile
+      if (t.alpha > 0.1) drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+
+      p.pop();
+    });
+  };
+});
+</script>
 </body>
 </html>

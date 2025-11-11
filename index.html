@@ -57,8 +57,9 @@
       let tiles = [];
       let loadedCount = 0;
 
-      let rot = 0;
+      let rot = 0; // rotação do fundo
 
+      // Preload imagens
       fileNames.forEach((url, idx) => {
         p.loadImage(url, img => {
           imgs[idx] = img;
@@ -114,24 +115,22 @@
         p.translate(p.width / 2, p.height / 2);
         p.rotate(rot);
 
-        const radius = Math.min(p.width, p.height) * 0.25 * 1.2;
-        const alphaPassive = 18; // mesma opacidade dos retângulos passivos
-
+        let radius = Math.min(p.width, p.height) * 0.25;
         p.noStroke();
 
-        // Parte branca
-        p.fill(255, alphaPassive);
+        // Fundo branco
+        p.fill(255);
+        p.ellipse(0, 0, radius * 2, radius * 2);
+
+        // Semicirculo preto
+        p.fill(0);
         p.arc(0, 0, radius * 2, radius * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
 
-        // Parte preta
-        p.fill(0, alphaPassive);
-        p.arc(0, 0, radius * 2, radius * 2, p.HALF_PI, p.TWO_PI - p.HALF_PI, p.PIE);
-
-        // Pequenas elipses internas (triplicadas)
-        const smallR = radius * 0.33 * 3;
-        p.fill(0, alphaPassive);
+        // Elipses internas (triplo)
+        let smallR = radius / 3 * 3; // 3x maior
+        p.fill(0);
         p.ellipse(0, -radius / 2, smallR, smallR);
-        p.fill(255, alphaPassive);
+        p.fill(255);
         p.ellipse(0, radius / 2, smallR, smallR);
 
         p.pop();
@@ -140,23 +139,24 @@
       p.draw = () => {
         p.background(255);
 
-        // Rotação suave do símbolo em direção ao cursor
-        const dx = p.mouseX - p.width / 2;
-        const dy = p.mouseY - p.height / 2;
-        const targetRot = p.atan2(dy, dx) * 0.03;
+        // Atualiza rotação sutil para direção do cursor
+        let dx = p.mouseX - p.width / 2;
+        let dy = p.mouseY - p.height / 2;
+        let targetRot = p.atan2(dy, dx) * 0.005; // movimento muito sutil
         rot = p.lerp(rot, targetRot, 0.02);
 
+        // Desenha fundo Yin Yang
         drawYinYang();
 
         if (loadedCount < fileNames.length) return;
 
-        const distances = tiles.map((t, i) => ({
+        let distances = tiles.map((t, i) => ({
           index: i,
           dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
         }));
         distances.sort((a, b) => a.dist - b.dist);
 
-        const partialIndexes = [];
+        let partialIndexes = [];
         for (let i = 0; i < distances.length; i++) {
           if (distances[i].dist > mainRange) {
             partialIndexes.push(distances[i].index);

@@ -29,8 +29,8 @@ new p5((p)=>{
   ];
 
   const tileSize = 60;
-  const maxTiles = 450;     // ✅ reduzido pela metade
-  const mainRange = tileSize*3;
+  const maxTiles = 450; 
+  const mainRange = tileSize * 3 * 0.8;   // ✅ range reduzido em 20%
   const partialCount = 46;
   const fadeDuration = 500;
 
@@ -77,8 +77,7 @@ new p5((p)=>{
         alpha:0,
         targetAlpha:0,
         targetScale:1,
-        targetRot:0,
-        lastUpdate:p.millis()
+        targetRot:0
       });
     }
   }
@@ -108,11 +107,11 @@ new p5((p)=>{
       const isPartial = partialIndexes.includes(i);
 
       if(isMain){
-        t.targetScale=1.75;   // ✅ maior
+        t.targetScale=1.75;
         t.targetRot=Math.random()*0.2-0.1;
         t.targetAlpha=255;
       } else if(isPartial){
-        t.targetScale=1.10;   // ✅ maior
+        t.targetScale=1.10;
         t.targetRot=Math.random()*0.1-0.05;
         t.targetAlpha=18;
       } else {
@@ -122,8 +121,9 @@ new p5((p)=>{
       }
 
       const dt=p.deltaTime;
-      const alphaLerp = dt/fadeDuration;
-      const scaleLerp = 0.05;
+
+      const alphaLerp = dt / (fadeDuration * 0.7); // ✅ mais fluido
+      const scaleLerp = 0.08;                      // ✅ resposta mais suave
 
       t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);

@@ -127,7 +127,7 @@
         p.arc(0, 0, radius * 2, radius * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
 
         // Elipses internas (triplo)
-        let smallR = radius / 3 * 3; // 3x maior
+        let smallR = radius; // maior intensidade
         p.fill(0);
         p.ellipse(0, -radius / 2, smallR, smallR);
         p.fill(255);
@@ -139,11 +139,11 @@
       p.draw = () => {
         p.background(255);
 
-        // Atualiza rotação sutil para direção do cursor
+        // Atualiza rotação mais intensa mas ainda suave
         let dx = p.mouseX - p.width / 2;
         let dy = p.mouseY - p.height / 2;
-        let targetRot = p.atan2(dy, dx) * 0.005; // movimento muito sutil
-        rot = p.lerp(rot, targetRot, 0.02);
+        let targetRot = p.atan2(dy, dx) * 0.02; // aumento da intensidade
+        rot = p.lerp(rot, targetRot, 0.05); // suavidade ainda presente
 
         // Desenha fundo Yin Yang
         drawYinYang();

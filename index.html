@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Background</title>
+  <title>HomeFX Trail Effect</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
       margin: 0;
@@ -10,59 +11,171 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      background-color: white; /* fundo branco como fallback */
-    }
-
-    /* Background da ImageKit */
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('https://ik.imagekit.io/q3d43lw6h/new%20site/homePlace.png?updatedAt=1762896391919');
-      background-size: cover; /* cobre toda a tela */
-      background-position: center;
-      background-repeat: no-repeat;
-      z-index: -1; /* atrás de todo conteúdo */
-    }
-
-    /* Exemplo de conteúdo flutuante (opcional) */
-    .content {
-      position: relative;
-      width: 100%;
-      height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      color: black;
-      font-family: Arial, sans-serif;
     }
+    #p5-holder { width: 100%; height: 100%; }
   </style>
 </head>
 <body>
-  <div class="content">
-    <!-- Aqui você coloca seus shapes, animações ou conteúdo -->
-    <h1>HomeFX</h1>
-  </div>
-
-  <!-- Scripts de animação ou p5.js podem ser adicionados aqui -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+  <div id="p5-holder"></div>
   <script>
-    // Exemplo de setup p5.js
-    /*
-    function setup() {
-      let cnv = createCanvas(windowWidth, windowHeight);
-      cnv.position(0, 0);
-      cnv.style('z-index', '0'); // atrás do conteúdo principal
-    }
+    new p5((p) => {
 
-    function draw() {
-      clear(); // mantém transparência sobre o background
-      // sua animação aqui
-    }
-    */
+      const fileNames = [
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Kit_camisa_alta.jpg?updatedAt=1762880812941",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/new01.png?updatedAt=1762880813205"
+      ];
+
+      const tileSize = 60;
+      const maxTiles = 450;
+      const mainRange = tileSize * 3 * 0.8;
+      const partialCount = 46;
+      const fadeDuration = 500;
+
+      let imgs = [];
+      let imgsGray = [];
+      let tiles = [];
+      let loadedCount = 0;
+
+      let bgImg;
+
+      // Preload imagens
+      p.preload = () => {
+        bgImg = p.loadImage("https://ik.imagekit.io/q3d43lw6h/new%20site/homePlace.png?updatedAt=1762896391919");
+        fileNames.forEach((url, idx) => {
+          p.loadImage(url, img => {
+            imgs[idx] = img;
+            let g = img.get();
+            g.filter(p.GRAY);
+            imgsGray[idx] = g;
+            loadedCount++;
+            if (loadedCount === fileNames.length) generateTiles();
+          });
+        });
+      };
+
+      function drawImageCover(img, w, h, alpha = 255) {
+        let ratio = img.width / img.height;
+        let boxRatio = w / h;
+        let drawW = w, drawH = h;
+        if (ratio > boxRatio) { drawH = h; drawW = ratio * drawH; }
+        else { drawW = w; drawH = drawW / ratio; }
+        p.drawingContext.imageSmoothingEnabled = true;
+        p.tint(255, alpha);
+        p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
+        p.noTint();
+      }
+
+      function generateTiles() {
+        tiles = [];
+        for (let i = 0; i < maxTiles; i++) {
+          tiles.push({
+            x: p.random(tileSize / 2, p.width - tileSize / 2),
+            y: p.random(tileSize / 2, p.height - tileSize / 2),
+            imgColor: imgs[i % imgs.length],
+            imgGray: imgsGray[i % imgsGray.length],
+            rot: 0,
+            scale: 1,
+            alpha: 0,
+            targetAlpha: 0,
+            targetScale: 1,
+            targetRot: 0
+          });
+        }
+      }
+
+      p.setup = () => {
+        p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+      };
+
+      p.windowResized = () => {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        generateTiles();
+      };
+
+      p.draw = () => {
+        // Fundo como imagem
+        p.background(255);
+        if(bgImg) {
+          p.imageMode(p.CORNER);
+          p.image(bgImg, 0, 0, p.width, p.height);
+        }
+
+        if (loadedCount < fileNames.length) return;
+
+        let distances = tiles.map((t, i) => ({
+          index: i,
+          dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
+        }));
+
+        distances.sort((a, b) => a.dist - b.dist);
+
+        let partialIndexes = [];
+        for (let i = 0; i < distances.length; i++) {
+          if (distances[i].dist > mainRange) {
+            partialIndexes.push(distances[i].index);
+            if (partialIndexes.length >= partialCount) break;
+          }
+        }
+
+        tiles.forEach((t, i) => {
+          const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+          const isMain = d < mainRange;
+          const isPartial = partialIndexes.includes(i);
+
+          if (isMain) {
+            t.targetScale = 1.75;
+            t.targetRot = Math.random() * 0.2 - 0.1;
+            t.targetAlpha = 255;
+          } else if (isPartial) {
+            t.targetScale = 1.10;
+            t.targetRot = Math.random() * 0.1 - 0.05;
+            t.targetAlpha = 18;
+          } else {
+            t.targetScale = 1;
+            t.targetRot = 0;
+            t.targetAlpha = 0;
+          }
+
+          const dt = p.deltaTime;
+          const alphaLerp = dt / (fadeDuration * 0.7);
+          const scaleLerp = 0.08;
+
+          t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
+          t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
+          t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
+
+          if (t.alpha > 0.1) {
+            p.push();
+            p.translate(t.x, t.y);
+            p.rotate(t.rot);
+            p.scale(t.scale);
+            p.imageMode(p.CENTER);
+            drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+            p.pop();
+          }
+        });
+      };
+    });
   </script>
 </body>
 </html>

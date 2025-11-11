@@ -20,188 +20,189 @@
   </style>
 </head>
 <body>
-<div id="p5-holder"></div>
-<script>
-new p5((p) => {
+  <div id="p5-holder"></div>
+  <script>
+    new p5((p) => {
 
-  // --- Fundo Yin Yang ---
-  let rot = 0;
+      const fileNames = [
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/Kit_camisa_alta.jpg?updatedAt=1762880812941",
+        "https://ik.imagekit.io/q3d43lw6h/new%20site/new01.png?updatedAt=1762880813205"
+      ];
 
-  function drawYinYang(cx, cy, radius) {
-    p.push();
-    p.translate(cx, cy);
-    p.rotate(rot); // aplicar rotação suave
-    let r = radius;
+      const tileSize = 60;
+      const maxTiles = 450;
+      const mainRange = tileSize * 3 * 0.8;
+      const partialCount = 46;
+      const fadeDuration = 500;
 
-    // Metade superior preta
-    p.fill(0);
-    p.noStroke();
-    p.arc(0, 0, r*2, r*2, -p.HALF_PI, p.HALF_PI, p.PIE);
+      let imgs = [];
+      let imgsGray = [];
+      let tiles = [];
+      let loadedCount = 0;
 
-    // Metade inferior branca
-    p.fill(255);
-    p.arc(0, 0, r*2, r*2, p.HALF_PI, p.TWO_PI - p.HALF_PI, p.PIE);
+      let rot = 0; // rotação do fundo
 
-    // Círculos menores centrais (agora 3x maior)
-    let smallR = r * 1.5; // antes era r, agora triplica
-    // Círculo menor preto (na metade branca)
-    p.fill(0);
-    p.ellipse(0, -r/2, smallR, smallR);
-    // Círculo menor branco (na metade preta)
-    p.fill(255);
-    p.ellipse(0, r/2, smallR, smallR);
-
-    p.pop();
-  }
-
-  // --- Rastro e imagens ---
-  const fileNames = [
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/Kit_camisa_alta.jpg?updatedAt=1762880812941",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/new01.png?updatedAt=1762880813205"
-  ];
-
-  const tileSize = 60;
-  const maxTiles = 450;
-  const mainRange = tileSize * 3 * 0.8;
-  const partialCount = 46;
-  const fadeDuration = 500;
-
-  let imgs = [];
-  let imgsGray = [];
-  let tiles = [];
-  let loadedCount = 0;
-
-  fileNames.forEach((url, idx) => {
-    p.loadImage(url, img => {
-      imgs[idx] = img;
-      let g = img.get();
-      g.filter(p.GRAY);
-      imgsGray[idx] = g;
-      loadedCount++;
-      if (loadedCount === fileNames.length) generateTiles();
-    });
-  });
-
-  function drawImageCover(img, w, h, alpha = 255) {
-    let ratio = img.width / img.height;
-    let boxRatio = w / h;
-    let drawW = w, drawH = h;
-    if (ratio > boxRatio) { drawH = h; drawW = ratio * drawH; }
-    else { drawW = w; drawH = drawW / ratio; }
-    p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha);
-    p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
-    p.noTint();
-  }
-
-  function generateTiles() {
-    tiles = [];
-    for (let i = 0; i < maxTiles; i++) {
-      tiles.push({
-        x: p.random(tileSize / 2, p.width - tileSize / 2),
-        y: p.random(tileSize / 2, p.height - tileSize / 2),
-        imgColor: imgs[i % imgs.length],
-        imgGray: imgsGray[i % imgsGray.length],
-        rot: 0,
-        scale: 1,
-        alpha: 0,
-        targetAlpha: 0,
-        targetScale: 1,
-        targetRot: 0
+      // Preload imagens
+      fileNames.forEach((url, idx) => {
+        p.loadImage(url, img => {
+          imgs[idx] = img;
+          let g = img.get();
+          g.filter(p.GRAY);
+          imgsGray[idx] = g;
+          loadedCount++;
+          if (loadedCount === fileNames.length) generateTiles();
+        });
       });
-    }
-  }
 
-  p.setup = () => {
-    p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-  };
-
-  p.windowResized = () => {
-    p.resizeCanvas(p.windowWidth, p.windowHeight);
-    generateTiles();
-  };
-
-  p.draw = () => {
-    // --- atualizar rotação do fundo suavemente ---
-    let dx = p.mouseX - p.width / 2;
-    let dy = p.mouseY - p.height / 2;
-    let targetRot = p.atan2(dy, dx) * 0.05;
-    rot = p.lerp(rot, targetRot, 0.01);
-
-    // --- desenhar fundo Yin Yang ---
-    drawYinYang(p.width / 2, p.height / 2, Math.min(p.width, p.height) * 0.25);
-
-    if (loadedCount < fileNames.length) return;
-
-    let distances = tiles.map((t, i) => ({
-      index: i,
-      dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
-    }));
-    distances.sort((a, b) => a.dist - b.dist);
-
-    let partialIndexes = [];
-    for (let i = 0; i < distances.length; i++) {
-      if (distances[i].dist > mainRange) {
-        partialIndexes.push(distances[i].index);
-        if (partialIndexes.length >= partialCount) break;
-      }
-    }
-
-    tiles.forEach((t, i) => {
-      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isMain = d < mainRange;
-      const isPartial = partialIndexes.includes(i);
-
-      if (isMain) {
-        t.targetScale = 1.75;
-        t.targetRot = Math.random() * 0.2 - 0.1;
-        t.targetAlpha = 255;
-      } else if (isPartial) {
-        t.targetScale = 1.10;
-        t.targetRot = Math.random() * 0.1 - 0.05;
-        t.targetAlpha = 18;
-      } else {
-        t.targetScale = 1;
-        t.targetRot = 0;
-        t.targetAlpha = 0;
+      function drawImageCover(img, w, h, alpha = 255) {
+        let ratio = img.width / img.height;
+        let boxRatio = w / h;
+        let drawW = w, drawH = h;
+        if (ratio > boxRatio) { drawH = h; drawW = ratio * drawH; }
+        else { drawW = w; drawH = drawW / ratio; }
+        p.drawingContext.imageSmoothingEnabled = true;
+        p.tint(255, alpha);
+        p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
+        p.noTint();
       }
 
-      const dt = p.deltaTime;
-      const alphaLerp = dt / (fadeDuration * 0.7);
-      const scaleLerp = 0.08;
+      function generateTiles() {
+        tiles = [];
+        for (let i = 0; i < maxTiles; i++) {
+          tiles.push({
+            x: p.random(tileSize / 2, p.width - tileSize / 2),
+            y: p.random(tileSize / 2, p.height - tileSize / 2),
+            imgColor: imgs[i % imgs.length],
+            imgGray: imgsGray[i % imgsGray.length],
+            rot: 0,
+            scale: 1,
+            alpha: 0,
+            targetAlpha: 0,
+            targetScale: 1,
+            targetRot: 0
+          });
+        }
+      }
 
-      t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
-      t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
-      t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
+      p.setup = () => {
+        p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+      };
 
-      if (t.alpha > 0.1) {
+      p.windowResized = () => {
+        p.resizeCanvas(p.windowWidth, p.windowHeight);
+        generateTiles();
+      };
+
+      function drawYinYang() {
         p.push();
-        p.translate(t.x, t.y);
-        p.rotate(t.rot);
-        p.scale(t.scale);
-        p.imageMode(p.CENTER);
-        drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+        p.translate(p.width / 2, p.height / 2);
+        p.rotate(rot);
+
+        let radius = Math.min(p.width, p.height) * 0.25;
+        p.noStroke();
+
+        // Fundo branco
+        p.fill(255);
+        p.ellipse(0, 0, radius * 2, radius * 2);
+
+        // Semicirculo preto
+        p.fill(0);
+        p.arc(0, 0, radius * 2, radius * 2, -p.HALF_PI, p.HALF_PI, p.PIE);
+
+        // Elipses internas (triplo)
+        let smallR = radius / 3 * 3; // 3x maior
+        p.fill(0);
+        p.ellipse(0, -radius / 2, smallR, smallR);
+        p.fill(255);
+        p.ellipse(0, radius / 2, smallR, smallR);
+
         p.pop();
       }
+
+      p.draw = () => {
+        p.background(255);
+
+        // Atualiza rotação sutil para direção do cursor
+        let dx = p.mouseX - p.width / 2;
+        let dy = p.mouseY - p.height / 2;
+        let targetRot = p.atan2(dy, dx) * 0.005; // movimento muito sutil
+        rot = p.lerp(rot, targetRot, 0.02);
+
+        // Desenha fundo Yin Yang
+        drawYinYang();
+
+        if (loadedCount < fileNames.length) return;
+
+        let distances = tiles.map((t, i) => ({
+          index: i,
+          dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
+        }));
+        distances.sort((a, b) => a.dist - b.dist);
+
+        let partialIndexes = [];
+        for (let i = 0; i < distances.length; i++) {
+          if (distances[i].dist > mainRange) {
+            partialIndexes.push(distances[i].index);
+            if (partialIndexes.length >= partialCount) break;
+          }
+        }
+
+        tiles.forEach((t, i) => {
+          const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
+          const isMain = d < mainRange;
+          const isPartial = partialIndexes.includes(i);
+
+          if (isMain) {
+            t.targetScale = 1.75;
+            t.targetRot = Math.random() * 0.2 - 0.1;
+            t.targetAlpha = 255;
+          } else if (isPartial) {
+            t.targetScale = 1.10;
+            t.targetRot = Math.random() * 0.1 - 0.05;
+            t.targetAlpha = 18;
+          } else {
+            t.targetScale = 1;
+            t.targetRot = 0;
+            t.targetAlpha = 0;
+          }
+
+          const dt = p.deltaTime;
+          const alphaLerp = dt / (fadeDuration * 0.7);
+          const scaleLerp = 0.08;
+
+          t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
+          t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
+          t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
+
+          if (t.alpha > 0.1) {
+            p.push();
+            p.translate(t.x, t.y);
+            p.rotate(t.rot);
+            p.scale(t.scale);
+            p.imageMode(p.CENTER);
+            drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+            p.pop();
+          }
+        });
+      };
     });
-  };
-});
-</script>
+  </script>
 </body>
 </html>

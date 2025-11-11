@@ -101,8 +101,9 @@
 
       p.setup = () => {
         p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-        // Gerar cor de fundo aleatória
-        bgColor = p.color(p.random(255), p.random(255), p.random(255));
+        // Escolher cor aleatória entre 3 opções
+        const colors = ['#1942bf', '#e82727', '#ffffff'];
+        bgColor = p.color(colors[Math.floor(p.random(colors.length))]);
       };
 
       p.windowResized = () => {

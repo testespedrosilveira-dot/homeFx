@@ -29,7 +29,7 @@ new p5((p)=>{
   ];
 
   const tileSize = 60;
-  const maxTiles = 300*3;
+  const maxTiles = 450;     // ✅ reduzido pela metade
   const mainRange = tileSize*3;
   const partialCount = 46;
   const fadeDuration = 500;
@@ -108,11 +108,11 @@ new p5((p)=>{
       const isPartial = partialIndexes.includes(i);
 
       if(isMain){
-        t.targetScale=1.75;   // AUMENTADO
+        t.targetScale=1.75;   // ✅ maior
         t.targetRot=Math.random()*0.2-0.1;
         t.targetAlpha=255;
       } else if(isPartial){
-        t.targetScale=1.10;   // AUMENTADO
+        t.targetScale=1.10;   // ✅ maior
         t.targetRot=Math.random()*0.1-0.05;
         t.targetAlpha=18;
       } else {

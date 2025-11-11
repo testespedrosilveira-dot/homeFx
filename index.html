@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Rastro Reggae Corrigido</title>
+  <title>HomeFX Trail Effect - Rastro Custom</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -39,21 +39,22 @@ new p5((p) => {
   const maxTiles = 450;
   const mainRange = tileSize * 3 * 0.8;
   const partialCount = 46;
-  const fadeDuration = 500;
-  const trailDuration = 500;
-
-  // Cores reggae corrigidas: azul (#1738df), cinza, vermelho (#df1717)
-  const reggaeColors = [
-    [23, 56, 223],   // azul
-    [128, 128, 128], // cinza
-    [0, 0, 0]    // vermelho
-  ];
+  const fadeDuration = 500; // meio segundo
 
   let imgs = [];
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
 
+  // Define cores do rastro: cinza, preto e uma cor aleatória
+  const randomColor = () => [Math.floor(Math.random()*256), Math.floor(Math.random()*256), Math.floor(Math.random()*256)];
+  const trailColors = [
+    [128, 128, 128], // cinza
+    [0, 0, 0],       // preto
+    randomColor()    // aleatória
+  ];
+
+  // Preload imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
@@ -91,15 +92,14 @@ new p5((p) => {
         targetAlpha: 0,
         targetScale: 1,
         targetRot: 0,
-        trailAlpha: 0,
-        trailColor: reggaeColors[p.floor(p.random(reggaeColors.length))]
+        // Escolhe aleatoriamente uma das 3 cores
+        trailColor: trailColors[Math.floor(p.random(trailColors.length))]
       });
     }
   }
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-    p.rectMode(p.CENTER);
   };
 
   p.windowResized = () => {
@@ -108,10 +108,7 @@ new p5((p) => {
   };
 
   p.draw = () => {
-    // Fundo translúcido para criar efeito de rastro contínuo
-    p.noStroke();
-    p.fill(255, 20); // leve desbotamento do fundo
-    p.rect(p.width/2, p.height/2, p.width, p.height);
+    p.background(255);
 
     if (loadedCount < fileNames.length) return;
 
@@ -119,6 +116,7 @@ new p5((p) => {
       index: i,
       dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
     }));
+
     distances.sort((a, b) => a.dist - b.dist);
 
     let partialIndexes = [];
@@ -136,16 +134,12 @@ new p5((p) => {
 
       if (isMain) {
         t.targetScale = 1.75;
-        t.targetRot = p.random(-0.1, 0.1);
+        t.targetRot = Math.random() * 0.2 - 0.1;
         t.targetAlpha = 255;
-        t.trailAlpha = 150;
-        t.trailColor = reggaeColors[p.floor(p.random(reggaeColors.length))];
       } else if (isPartial) {
         t.targetScale = 1.10;
-        t.targetRot = p.random(-0.05, 0.05);
-        t.targetAlpha = 18;
-        t.trailAlpha = 60;
-        t.trailColor = reggaeColors[p.floor(p.random(reggaeColors.length))];
+        t.targetRot = Math.random() * 0.1 - 0.05;
+        t.targetAlpha = 50;
       } else {
         t.targetScale = 1;
         t.targetRot = 0;
@@ -155,30 +149,28 @@ new p5((p) => {
       const dt = p.deltaTime;
       const alphaLerp = dt / (fadeDuration * 0.7);
       const scaleLerp = 0.08;
-      const trailLerp = dt / trailDuration;
 
       t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
       t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
       t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
-      t.trailAlpha = p.lerp(t.trailAlpha, 0, trailLerp);
 
-      p.push();
-      p.translate(t.x, t.y);
-      p.rotate(t.rot);
-      p.scale(t.scale);
-      p.imageMode(p.CENTER);
+      if (t.alpha > 0.1) {
+        p.push();
+        p.translate(t.x, t.y);
+        p.rotate(t.rot);
+        p.scale(t.scale);
+        p.imageMode(p.CENTER);
+        drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
 
-      // desenha rastro reggae
-      if (t.trailAlpha > 0.5) {
-        p.fill(t.trailColor[0], t.trailColor[1], t.trailColor[2], t.trailAlpha);
+        // Retângulo de rastro
         p.noStroke();
+        const c = t.trailColor;
+        p.fill(c[0], c[1], c[2], t.alpha * 0.2);
+        p.rectMode(p.CENTER);
         p.rect(0, 0, tileSize, tileSize);
+
+        p.pop();
       }
-
-      // desenha o tile
-      if (t.alpha > 0.1) drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
-
-      p.pop();
     });
   };
 });

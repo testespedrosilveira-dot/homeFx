@@ -27,13 +27,12 @@ new p5((p)=>{
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
     "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
 
-    // ✅ Novas imagens adicionadas
+    // Novas imagens
     "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_09.png?updatedAt=1762880818209",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/dunes_02_00310.png?updatedAt=1762880816663",
-    "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp?updatedAt=1762880816173",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/Balma-Films_08.png?updatedAt=1762880814239",
     "https://ik.imagekit.io/q3d43lw6h/new%20site/CAPA_HC10_PC_edit.png?",
@@ -49,7 +48,7 @@ new p5((p)=>{
 
   let imgs = [], imgsGray = [], tiles = [], loadedCount = 0;
 
-  // ✅ PRELOAD OTIMIZADO
+  // Preload otimizado
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
@@ -141,7 +140,19 @@ new p5((p)=>{
         p.rotate(t.rot);
         p.scale(t.scale);
         p.imageMode(p.CENTER);
-        drawImageCover(isMain?t.imgColor:t.imgGray,tileSize,tileSize,t.alpha);
+
+        // Efeito de rastro colorido
+        if(isMain){
+          drawImageCover(t.imgColor,tileSize,tileSize,t.alpha);
+        } else if(t.alpha>10){
+          // rastro parcialmente colorido
+          p.tint(255, t.alpha*0.3);
+          drawImageCover(t.imgColor,tileSize,tileSize,t.alpha);
+          p.noTint();
+        } else {
+          drawImageCover(t.imgGray,tileSize,tileSize,t.alpha);
+        }
+
         p.pop();
       }
     });

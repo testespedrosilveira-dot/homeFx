@@ -36,17 +36,17 @@
       ];
 
       const tileSize = 60;
-      const maxTiles = 200;
+      const maxTiles = 450;
       const mainRange = tileSize * 3 * 0.8;
       const partialCount = 46;
-      const fadeDuration = 500 + 2000;
+      const fadeDuration = 500; // controle do aparecimento
+      const trailDuration = 500; // meio segundo para desaparecer o rastro
 
       let imgs = [];
       let imgsGray = [];
       let tiles = [];
       let loadedCount = 0;
 
-      // Preload imagens
       fileNames.forEach((url, idx) => {
         p.loadImage(url, img => {
           imgs[idx] = img;
@@ -73,7 +73,6 @@
       function generateTiles() {
         tiles = [];
         for (let i = 0; i < maxTiles; i++) {
-          let grayVal = p.random(50, 255); // escala de cinza
           tiles.push({
             x: p.random(tileSize / 2, p.width - tileSize / 2),
             y: p.random(tileSize / 2, p.height - tileSize / 2),
@@ -85,7 +84,7 @@
             targetAlpha: 0,
             targetScale: 1,
             targetRot: 0,
-            grayOverlay: p.color(grayVal, grayVal, grayVal, 0)
+            trailAlpha: 0 // alpha do rastro cinza
           });
         }
       }
@@ -100,13 +99,14 @@
       };
 
       p.draw = () => {
+        p.background(255);
+
         if (loadedCount < fileNames.length) return;
 
         let distances = tiles.map((t, i) => ({
           index: i,
           dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
         }));
-
         distances.sort((a, b) => a.dist - b.dist);
 
         let partialIndexes = [];
@@ -124,12 +124,14 @@
 
           if (isMain) {
             t.targetScale = 1.75;
-            t.targetRot = Math.random() * 0.2 - 0.1;
+            t.targetRot = p.random(-0.1, 0.1);
             t.targetAlpha = 255;
+            t.trailAlpha = 100; // rastro inicial quando ativo
           } else if (isPartial) {
             t.targetScale = 1.10;
-            t.targetRot = Math.random() * 0.1 - 0.05;
+            t.targetRot = p.random(-0.05, 0.05);
             t.targetAlpha = 18;
+            t.trailAlpha = 20;
           } else {
             t.targetScale = 1;
             t.targetRot = 0;
@@ -137,31 +139,33 @@
           }
 
           const dt = p.deltaTime;
-          const alphaLerp = dt / 200;
+          const alphaLerp = dt / (fadeDuration * 0.7);
           const scaleLerp = 0.08;
+          const trailLerp = dt / trailDuration;
 
           t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
           t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
           t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
+          t.trailAlpha = p.lerp(t.trailAlpha, 0, trailLerp); // desaparece o rastro em 0.5s
 
-          if (t.alpha > 0.1) {
-            p.push();
-            p.translate(t.x, t.y);
-            p.rotate(t.rot);
-            p.scale(t.scale);
+          p.push();
+          p.translate(t.x, t.y);
+          p.rotate(t.rot);
+          p.scale(t.scale);
+          p.imageMode(p.CENTER);
 
-            // Overlay cinza proporcional à opacidade do tile
-            let overlayAlpha = p.map(t.alpha, 0, 255, 0, 120);
-            t.grayOverlay.setAlpha(overlayAlpha);
+          // desenha rastro cinza primeiro
+          if (t.trailAlpha > 0.5) {
+            p.fill(150, t.trailAlpha); // cinza
             p.noStroke();
-            p.fill(t.grayOverlay);
             p.rectMode(p.CENTER);
             p.rect(0, 0, tileSize, tileSize);
-
-            p.imageMode(p.CENTER);
-            drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
-            p.pop();
           }
+
+          // desenha o tile colorido/cinza
+          if (t.alpha > 0.1) drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+
+          p.pop();
         });
       };
     });

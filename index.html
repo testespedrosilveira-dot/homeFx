@@ -10,6 +10,7 @@
       padding: 0;
       width: 100%;
       height: 100%;
+      background: white;
       overflow: hidden;
       display: flex;
       justify-content: center;
@@ -32,6 +33,7 @@
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
         "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg",
+        // Novas imagens
         "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy02_01084.png?updatedAt=1762880819064",
         "https://ik.imagekit.io/q3d43lw6h/new%20site/fuzzy3_02557.png?updatedAt=1762880818097",
         "https://ik.imagekit.io/q3d43lw6h/new%20site/ISO_spreads3334_2_PAGiso01_cam0024.webp?updatedAt=1762880817600",
@@ -56,23 +58,19 @@
       let tiles = [];
       let loadedCount = 0;
 
-      let bgImg;
-
       // Preload imagens
-      p.preload = () => {
-        bgImg = p.loadImage("https://ik.imagekit.io/q3d43lw6h/new%20site/homePlace.png?updatedAt=1762896391919");
-        fileNames.forEach((url, idx) => {
-          p.loadImage(url, img => {
-            imgs[idx] = img;
-            let g = img.get();
-            g.filter(p.GRAY);
-            imgsGray[idx] = g;
-            loadedCount++;
-            if (loadedCount === fileNames.length) generateTiles();
-          });
+      fileNames.forEach((url, idx) => {
+        p.loadImage(url, img => {
+          imgs[idx] = img;
+          let g = img.get();
+          g.filter(p.GRAY);
+          imgsGray[idx] = g;
+          loadedCount++;
+          if (loadedCount === fileNames.length) generateTiles();
         });
-      };
+      });
 
+      // Função para desenhar imagem com ajuste de proporção
       function drawImageCover(img, w, h, alpha = 255) {
         let ratio = img.width / img.height;
         let boxRatio = w / h;
@@ -113,12 +111,7 @@
       };
 
       p.draw = () => {
-        // Fundo como imagem
         p.background(255);
-        if(bgImg) {
-          p.imageMode(p.CORNER);
-          p.image(bgImg, 0, 0, p.width, p.height);
-        }
 
         if (loadedCount < fileNames.length) return;
 

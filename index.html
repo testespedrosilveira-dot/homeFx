@@ -165,7 +165,9 @@ new p5((p) => {
         // Retângulo de rastro
         p.noStroke();
         const c = t.trailColor;
-        p.fill(c[0], c[1], c[2], t.alpha * 0.2);
+        // Se for a cor aleatória (colorida), opacidade maior
+        let opacityMultiplier = (c === trailColors[2]) ? 0.8 : 0.2;
+        p.fill(c[0], c[1], c[2], t.alpha * opacityMultiplier);
         p.rectMode(p.CENTER);
         p.rect(0, 0, tileSize, tileSize);
 

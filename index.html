@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>HomeFX Trail Effect - Optimized</title>
+  <title>HomeFX Trail Effect - Fake Loading</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
   <style>
     html, body {
@@ -17,13 +17,38 @@
       align-items: center;
     }
     #p5-holder { width: 100%; height: 100%; }
+
+    /* Tela de loading */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #loading-rect {
+      width: 100px;
+      height: 100px;
+      background: #c6c6c6;
+    }
   </style>
 </head>
 <body>
 <div id="p5-holder"></div>
 
+<!-- Tela de Loading -->
+<div id="loading-screen">
+  <div id="loading-rect"></div>
+</div>
+
 <script>
 new p5((p) => {
+
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
     "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
@@ -36,38 +61,79 @@ new p5((p) => {
   ];
 
   const tileSize = 60;
-  const maxTiles = 150; // menor quantidade para performance
+  const maxTiles = 450;
   const mainRange = tileSize * 3 * 0.8;
+  const partialCount = 46;
+  const fadeDuration = 500; // meio segundo
 
-  let imgs = [], imgsGray = [];
+  let imgs = [];
+  let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
 
-  const trailColors = [
-    [128,128,128],
-    [0,0,0],
-    [Math.floor(Math.random()*256), Math.floor(Math.random()*256), Math.floor(Math.random()*256)]
+  const randomColor = () => [
+    Math.floor(Math.random() * 256),
+    Math.floor(Math.random() * 256),
+    Math.floor(Math.random() * 256)
   ];
 
-  // Preload imagens e criar versão cinza
+  const trailColors = [
+    [128, 128, 128], // cinza
+    [0, 0, 0],       // preto
+    randomColor()    // aleatória
+  ];
+
+  // --- Fake loading: piscando ---
+  const loadingRect = document.getElementById('loading-rect');
+  let blink = true;
+  let blinkCount = 0;
+  const blinkInterval = setInterval(() => {
+    blink = !blink;
+    loadingRect.style.opacity = blink ? 1 : 0;
+    if (!blink) blinkCount++;
+    if (blinkCount >= 3) blinkCount = 0; // continuará piscando até carregar
+  }, 500);
+
+  // Preload imagens
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
-      let g = p.createImage(img.width, img.height);
-      g.copy(img,0,0,img.width,img.height,0,0,img.width,img.height);
+      let g = img.get();
       g.filter(p.GRAY);
       imgsGray[idx] = g;
       loadedCount++;
-      if (loadedCount === fileNames.length) generateTiles();
+      if (loadedCount === fileNames.length) {
+        // Todas carregadas, remove loading
+        clearInterval(blinkInterval);
+        document.getElementById('loading-screen').remove();
+        generateTiles();
+      }
     });
   });
 
+  function drawImageCover(img, w, h, alpha = 255) {
+    let ratio = img.width / img.height;
+    let boxRatio = w / h;
+    let drawW = w, drawH = h;
+    if (ratio > boxRatio) {
+      drawH = h;
+      drawW = ratio * drawH;
+    } else {
+      drawW = w;
+      drawH = drawW / ratio;
+    }
+    p.drawingContext.imageSmoothingEnabled = true;
+    p.tint(255, alpha);
+    p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
+    p.noTint();
+  }
+
   function generateTiles() {
     tiles = [];
-    for (let i=0; i<maxTiles; i++) {
+    for (let i = 0; i < maxTiles; i++) {
       tiles.push({
-        x: p.random(tileSize/2, p.width-tileSize/2),
-        y: p.random(tileSize/2, p.height-tileSize/2),
+        x: p.random(tileSize / 2, p.width - tileSize / 2),
+        y: p.random(tileSize / 2, p.height - tileSize / 2),
         imgColor: imgs[i % imgs.length],
         imgGray: imgsGray[i % imgsGray.length],
         rot: 0,
@@ -87,24 +153,55 @@ new p5((p) => {
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
-    if (loadedCount === fileNames.length) generateTiles();
+    generateTiles();
   };
 
   p.draw = () => {
-    if (loadedCount < fileNames.length) return;
+    if (loadedCount < fileNames.length) return; // não desenha nada enquanto carrega
+
     p.background(255);
 
-    tiles.forEach(t => {
+    let distances = tiles.map((t, i) => ({
+      index: i,
+      dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
+    }));
+
+    distances.sort((a, b) => a.dist - b.dist);
+
+    let partialIndexes = [];
+    for (let i = 0; i < distances.length; i++) {
+      if (distances[i].dist > mainRange) {
+        partialIndexes.push(distances[i].index);
+        if (partialIndexes.length >= partialCount) break;
+      }
+    }
+
+    tiles.forEach((t, i) => {
       const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
       const isMain = d < mainRange;
+      const isPartial = partialIndexes.includes(i);
 
-      t.targetScale = isMain ? 1.75 : 1;
-      t.targetRot = isMain ? (Math.random()*0.2-0.1) : 0;
-      t.targetAlpha = isMain ? 255 : 50;
+      if (isMain) {
+        t.targetScale = 1.75;
+        t.targetRot = Math.random() * 0.2 - 0.1;
+        t.targetAlpha = 255;
+      } else if (isPartial) {
+        t.targetScale = 1.10;
+        t.targetRot = Math.random() * 0.1 - 0.05;
+        t.targetAlpha = 50;
+      } else {
+        t.targetScale = 1;
+        t.targetRot = 0;
+        t.targetAlpha = 0;
+      }
 
-      t.alpha = p.lerp(t.alpha, t.targetAlpha, 0.08);
-      t.scale = p.lerp(t.scale, t.targetScale, 0.08);
-      t.rot = p.lerp(t.rot, t.targetRot, 0.08);
+      const dt = p.deltaTime;
+      const alphaLerp = dt / (fadeDuration * 0.7);
+      const scaleLerp = 0.08;
+
+      t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
+      t.scale = p.lerp(t.scale, t.targetScale, scaleLerp);
+      t.rot = p.lerp(t.rot, t.targetRot, scaleLerp);
 
       if (t.alpha > 0.1) {
         p.push();
@@ -112,7 +209,15 @@ new p5((p) => {
         p.rotate(t.rot);
         p.scale(t.scale);
         p.imageMode(p.CENTER);
-        p.image(isMain ? t.imgColor : t.imgGray, 0, 0, tileSize, tileSize);
+        drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
+
+        p.noStroke();
+        const c = t.trailColor;
+        let opacityMultiplier = (c === trailColors[2]) ? 0.8 : 0.2;
+        p.fill(c[0], c[1], c[2], t.alpha * opacityMultiplier);
+        p.rectMode(p.CENTER);
+        p.rect(0, 0, tileSize, tileSize);
+
         p.pop();
       }
     });

@@ -36,7 +36,7 @@ new p5((p) => {
   ];
 
   const tileSize = 60;
-  const maxTiles = 150;
+  const maxTiles = 150; // menor quantidade para performance
   const mainRange = tileSize * 3 * 0.8;
 
   let imgs = [], imgsGray = [];
@@ -49,7 +49,7 @@ new p5((p) => {
     [Math.floor(Math.random()*256), Math.floor(Math.random()*256), Math.floor(Math.random()*256)]
   ];
 
-  // Preload imagens e gerar versão cinza
+  // Preload imagens e criar versão cinza
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;

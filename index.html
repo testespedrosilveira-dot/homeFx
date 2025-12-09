@@ -93,7 +93,9 @@ new p5((p) => {
   function generateTiles() {
     tiles = [];
     for (let i = 0; i < maxTiles; i++) {
-      let imgIndex = i % imgs.length;
+
+      let imgIndex = Math.floor(p.random(imgs.length)); // embaralha ao nascer
+
       tiles.push({
         x: p.random(tileSize / 2, p.width - tileSize / 2),
         y: p.random(tileSize / 2, p.height - tileSize / 2),
@@ -107,7 +109,10 @@ new p5((p) => {
         targetScale: 1,
         targetRot: 0,
         trailColor: trailColors[Math.floor(p.random(trailColors.length))],
-        _lastWasMain: false
+
+        // Controle para shuffle contínuo
+        shuffleTimer: 0,
+        shuffleInterval: p.random(80, 160) // aleatório para não sincronizar
       });
     }
   }
@@ -146,34 +151,33 @@ new p5((p) => {
       const isMain = d < mainRange;
       const isPartial = partialIndexes.includes(i);
 
+      // 🔄 SHUFFLE CONTÍNUO DENTRO DO RAIO PRINCIPAL
       if (isMain) {
+        t.shuffleTimer += p.deltaTime;
+        if (t.shuffleTimer >= t.shuffleInterval) {
+          t.shuffleTimer = 0;
+          t.shuffleInterval = p.random(80, 160);
 
-        // 🌟 NOVO: embaralhar quando entra na área principal
-        if (!t._lastWasMain) {
           let newIndex = Math.floor(p.random(imgs.length));
           while (newIndex === t.imgIndex) {
             newIndex = Math.floor(p.random(imgs.length));
           }
+
           t.imgIndex = newIndex;
           t.imgColor = imgs[newIndex];
           t.imgGray = imgsGray[newIndex];
         }
-        t._lastWasMain = true;
 
         t.targetScale = 1.75;
         t.targetRot = Math.random() * 0.2 - 0.1;
         t.targetAlpha = 255;
 
       } else if (isPartial) {
-        t._lastWasMain = false;
-
         t.targetScale = 1.10;
         t.targetRot = Math.random() * 0.1 - 0.05;
         t.targetAlpha = 50;
 
       } else {
-        t._lastWasMain = false;
-
         t.targetScale = 1;
         t.targetRot = 0;
         t.targetAlpha = 0;

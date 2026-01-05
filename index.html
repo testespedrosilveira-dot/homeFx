@@ -25,15 +25,20 @@
 <script>
 new p5((p) => {
 
+  /* 🔁 IMAGENS ATUALIZADAS */
   const fileNames = [
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_pp_00331.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/CAPA2811_pc1_1.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/thumb_fuzzy.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/Balma_maleta_mao-2.png",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_005.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_002.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_009.jpeg",
-    "https://ik.imagekit.io/q3d43lw6h/site/BudMag_003.jpeg"
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/BudMag_003_www.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS1_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0214671H_MOL_00286.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/2.webp",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/ISO_spreads3334_2_PAGiso01_cam0024.webp",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/image-8cdc0c1e-272f-4031-9f80-099782f64760.webp",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/07.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/1%20(1).webp",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS5_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0216683H_MOL_00268.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS2_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0214672H_MOL_00235.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/Balma_maleta_mao-2.png",
+    "https://ik.imagekit.io/q3d43lw6h/new%20pics/MacBook-Pro_Great-Work-Happens-on-Mac-Dance-E-Bikes_15_STILL_AU-EN_DDMMYYYY_1080x1080_JPEG_00000.png"
   ];
 
   const tileSize = 60;
@@ -59,7 +64,7 @@ new p5((p) => {
     randomColor()
   ];
 
-  // Preload imagens
+  /* preload */
   fileNames.forEach((url, idx) => {
     p.loadImage(url, img => {
       imgs[idx] = img;
@@ -77,6 +82,7 @@ new p5((p) => {
     let ratio = img.width / img.height;
     let boxRatio = w / h;
     let drawW = w, drawH = h;
+
     if (ratio > boxRatio) {
       drawH = h;
       drawW = ratio * drawH;
@@ -84,6 +90,7 @@ new p5((p) => {
       drawW = w;
       drawH = drawW / ratio;
     }
+
     p.drawingContext.imageSmoothingEnabled = true;
     p.tint(255, alpha);
     p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
@@ -93,13 +100,12 @@ new p5((p) => {
   function generateTiles() {
     tiles = [];
     for (let i = 0; i < maxTiles; i++) {
-
-      let imgIndex = Math.floor(p.random(imgs.length)); // embaralha ao nascer
+      let imgIndex = Math.floor(p.random(imgs.length));
 
       tiles.push({
         x: p.random(tileSize / 2, p.width - tileSize / 2),
         y: p.random(tileSize / 2, p.height - tileSize / 2),
-        imgIndex: imgIndex,
+        imgIndex,
         imgColor: imgs[imgIndex],
         imgGray: imgsGray[imgIndex],
         rot: 0,
@@ -109,10 +115,8 @@ new p5((p) => {
         targetScale: 1,
         targetRot: 0,
         trailColor: trailColors[Math.floor(p.random(trailColors.length))],
-
-        // Controle para shuffle contínuo
         shuffleTimer: 0,
-        shuffleInterval: p.random(80, 160) // aleatório para não sincronizar
+        shuffleInterval: p.random(80, 160)
       });
     }
   }
@@ -151,7 +155,6 @@ new p5((p) => {
       const isMain = d < mainRange;
       const isPartial = partialIndexes.includes(i);
 
-      // 🔄 SHUFFLE CONTÍNUO DENTRO DO RAIO PRINCIPAL
       if (isMain) {
         t.shuffleTimer += p.deltaTime;
         if (t.shuffleTimer >= t.shuffleInterval) {

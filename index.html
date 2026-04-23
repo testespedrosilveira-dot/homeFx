@@ -1,195 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #p5-holder { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+
+<div id="p5-holder"></div>
+
 <script>
 new p5((p) => {
 
-  const fileNames = [ /* ...mantido igual... */ ];
-
-  const tileSize = 60;
-  const maxTiles = 333;
-  const mainRange = tileSize * 3 * 0.8;
-  const partialCount = 23;
-  const fadeDuration = 500;
+  const fileNames = [
+    "https://picsum.photos/200?1",
+    "https://picsum.photos/200?2"
+  ];
 
   let imgs = [];
-  let imgsGray = [];
-  let tiles = [];
-  let loadedCount = 0;
+  let loaded = 0;
 
-  // 🔒 seed fixa por reload (consistência)
-  let seed = 12345;
-
-  const rand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-
-  const randomColor = () => [
-    Math.floor(rand() * 256),
-    Math.floor(rand() * 256),
-    Math.floor(rand() * 256)
-  ];
-
-  const trailColors = [
-    [128, 128, 128],
-    [0, 0, 0],
-    randomColor()
-  ];
-
-  fileNames.forEach((url, idx) => {
+  fileNames.forEach((url, i) => {
     p.loadImage(url, img => {
-      imgs[idx] = img;
-      let g = img.get();
-      g.filter(p.GRAY);
-      imgsGray[idx] = g;
-      loadedCount++;
-      if (loadedCount === fileNames.length) generateTiles();
+      imgs[i] = img;
+      loaded++;
     });
   });
 
-  function drawImageCover(img, w, h, alpha = 255) {
-    let ratio = img.width / img.height;
-    let boxRatio = w / h;
-    let drawW = w, drawH = h;
-
-    if (ratio > boxRatio) {
-      drawH = h;
-      drawW = ratio * drawH;
-    } else {
-      drawW = w;
-      drawH = drawW / ratio;
-    }
-
-    p.drawingContext.imageSmoothingEnabled = true;
-    p.tint(255, alpha);
-    p.image(img, -drawW / 2, -drawH / 2, drawW, drawH);
-    p.noTint();
-  }
-
-  function generateTiles() {
-    tiles = [];
-
-    for (let i = 0; i < maxTiles; i++) {
-      let imgIndex = Math.floor(rand() * imgs.length);
-
-      tiles.push({
-        x: rand() * (p.width - tileSize) + tileSize / 2,
-        y: rand() * (p.height - tileSize) + tileSize / 2,
-        imgIndex,
-        imgColor: imgs[imgIndex],
-        imgGray: imgsGray[imgIndex],
-        rot: 0,
-        scale: 1,
-        alpha: 0,
-        targetAlpha: 0,
-        targetScale: 1,
-        targetRot: 0,
-        trailColor: trailColors[Math.floor(rand() * trailColors.length)],
-        shuffleTimer: 0,
-        shuffleInterval: rand() * 80 + 80
-      });
-    }
-  }
-
   p.setup = () => {
-    p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
-  };
-
-  p.windowResized = () => {
-    p.resizeCanvas(p.windowWidth, p.windowHeight);
-    if (loadedCount === fileNames.length) generateTiles();
+    p.createCanvas(window.innerWidth, window.innerHeight).parent("p5-holder");
   };
 
   p.draw = () => {
-    if (loadedCount < fileNames.length) return;
+    p.background(220);
 
-    p.background(255);
-
-    // 🔒 clamp deltaTime (remove spikes)
-    const dt = Math.min(p.deltaTime, 32);
-
-    let distances = tiles.map((t, i) => ({
-      index: i,
-      dist: p.dist(p.mouseX, p.mouseY, t.x, t.y)
-    }));
-
-    distances.sort((a, b) => a.dist - b.dist);
-
-    // 🔥 troca includes por Set (performance estável)
-    let partialSet = new Set();
-    for (let i = 0; i < distances.length; i++) {
-      if (distances[i].dist > mainRange) {
-        partialSet.add(distances[i].index);
-        if (partialSet.size >= partialCount) break;
-      }
+    if (loaded < fileNames.length) {
+      p.fill(0);
+      p.text("loading...", 20, 20);
+      return;
     }
 
-    tiles.forEach((t, i) => {
-      const d = p.dist(p.mouseX, p.mouseY, t.x, t.y);
-      const isMain = d < mainRange;
-      const isPartial = partialSet.has(i);
-
-      if (isMain) {
-        t.shuffleTimer += dt;
-
-        if (t.shuffleTimer >= t.shuffleInterval) {
-          t.shuffleTimer = 0;
-          t.shuffleInterval = rand() * 80 + 80;
-
-          let newIndex = Math.floor(rand() * imgs.length);
-          while (newIndex === t.imgIndex) {
-            newIndex = Math.floor(rand() * imgs.length);
-          }
-
-          t.imgIndex = newIndex;
-          t.imgColor = imgs[newIndex];
-          t.imgGray = imgsGray[newIndex];
-        }
-
-        t.targetScale = 1.75;
-        t.targetRot = rand() * 0.2 - 0.1;
-        t.targetAlpha = 255;
-
-      } else if (isPartial) {
-        t.targetScale = 1.10;
-        t.targetRot = rand() * 0.1 - 0.05;
-        t.targetAlpha = 50;
-
-      } else {
-        t.targetScale = 1;
-        t.targetRot = 0;
-        t.targetAlpha = 0;
-      }
-
-      const alphaLerp = dt / (fadeDuration * 0.7);
-      const smooth = 0.08;
-
-      t.alpha = p.lerp(t.alpha, t.targetAlpha, alphaLerp);
-      t.scale = p.lerp(t.scale, t.targetScale, smooth);
-      t.rot = p.lerp(t.rot, t.targetRot, smooth);
-
-      if (t.alpha > 0.1) {
-        p.push();
-        p.translate(t.x, t.y);
-        p.rotate(t.rot);
-        p.scale(t.scale);
-        p.imageMode(p.CENTER);
-
-        drawImageCover(isMain ? t.imgColor : t.imgGray, tileSize, tileSize, t.alpha);
-
-        p.noStroke();
-        const c = t.trailColor;
-
-        // 🔒 sem comparação por referência frágil
-        const isAccent = c[0] !== 128 && c[1] !== 128;
-
-        let opacityMultiplier = isAccent ? 0.8 : 0.2;
-
-        p.fill(c[0], c[1], c[2], t.alpha * opacityMultiplier);
-        p.rectMode(p.CENTER);
-        p.rect(0, 0, tileSize, tileSize);
-
-        p.pop();
-      }
-    });
+    p.image(imgs[0], 100, 100);
   };
+
 });
 </script>
+
+</body>
+</html>

@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>HomeFX Trail Effect - Stable</title>
 
-  <!-- p5 -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
 
   <style>
@@ -30,7 +29,6 @@
 <script>
 new p5((p) => {
 
-  /* 🔁 SUAS IMAGENS */
   const fileNames = [
     "https://ik.imagekit.io/q3d43lw6h/new%20pics/BudMag_003_www.png",
     "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS1_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0214671H_MOL_00286.png",
@@ -56,6 +54,7 @@ new p5((p) => {
   let imgsGray = [];
   let tiles = [];
   let loadedCount = 0;
+  let isReady = false;
 
   const randomColor = () => [
     p.random(255),
@@ -81,10 +80,9 @@ new p5((p) => {
         imgsGray[idx] = g;
 
         loadedCount++;
-        if (loadedCount === fileNames.length) generateTiles();
+        if (loadedCount === fileNames.length && isReady) generateTiles();
       },
-      err => {
-        console.warn("erro imagem:", url);
+      () => {
         loadedCount++;
       }
     );
@@ -112,12 +110,15 @@ new p5((p) => {
   function generateTiles() {
     tiles = [];
 
+    const w = p.width || window.innerWidth;
+    const h = p.height || window.innerHeight;
+
     for (let i = 0; i < maxTiles; i++) {
       let imgIndex = Math.floor(p.random(imgs.length));
 
       tiles.push({
-        x: p.random(tileSize/2, p.width - tileSize/2),
-        y: p.random(tileSize/2, p.height - tileSize/2),
+        x: p.random(tileSize/2, w - tileSize/2),
+        y: p.random(tileSize/2, h - tileSize/2),
 
         imgIndex,
         imgColor: imgs[imgIndex],
@@ -141,21 +142,27 @@ new p5((p) => {
 
   p.setup = () => {
     p.createCanvas(p.windowWidth, p.windowHeight).parent("p5-holder");
+
+    setTimeout(() => {
+      p.resizeCanvas(p.windowWidth, p.windowHeight);
+      isReady = true;
+
+      if (loadedCount === fileNames.length) generateTiles();
+    }, 50);
   };
 
   p.windowResized = () => {
     p.resizeCanvas(p.windowWidth, p.windowHeight);
-    if (loadedCount === fileNames.length) generateTiles();
+    if (loadedCount === fileNames.length && isReady) generateTiles();
   };
 
   p.draw = () => {
-    if (loadedCount < fileNames.length) return;
+    if (!isReady || loadedCount < fileNames.length) return;
 
     p.background(255);
 
     const dt = Math.min(p.deltaTime, 32);
 
-    /* 🔥 seleção parcial sem sort */
     let partialSet = new Set();
     let count = 0;
 

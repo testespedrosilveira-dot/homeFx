@@ -2,182 +2,88 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Video Carousel</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wide Carousel v4</title>
 <style>
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  height:100%;
-  background:#fff;
-}
-.stage{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  background:#fff;
-}
-.track{
-  position:absolute;
-  inset:0;
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;}
+.stage{position:relative;width:100vw;height:100vh;overflow:hidden;}
+.track{position:absolute;inset:0;}
 .slide{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:320px;
-  aspect-ratio:9/16;
-  max-width:80vw;
-  max-height:80vh;
-  overflow:hidden;
-  will-change:transform,opacity;
-  transition:
-    transform .9s cubic-bezier(.22,.61,.36,1),
-    opacity .55s ease;
+position:absolute;
+top:50%;
+left:50%;
+width:560px;
+aspect-ratio:9/16;
+transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .35s ease;
+will-change:transform,opacity;
 }
-.slide iframe{
-  width:100%;
-  height:100%;
-  border:none;
-  display:block;
-  pointer-events:none;
-  transform:scale(1.02);
-}
-.frame{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:320px;
-  aspect-ratio:9/16;
-  max-width:80vw;
-  max-height:80vh;
-  transform:translate(-50%,-50%);
-  border:12px solid #fff;
-  box-sizing:content-box;
-  background:transparent;
-  transition:border-color .25s ease;
-  z-index:5;
-  cursor:pointer;
+.slide iframe{width:100%;height:100%;border:0;display:block;pointer-events:none;}
+.centerBlock{
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+width:420px;
+aspect-ratio:9/16;
+background:#b3b3b3;
+border:12px solid #fff;
+box-sizing:content-box;
+transition:background-color .25s ease;
+z-index:10;
+cursor:pointer;
 }
 </style>
 </head>
 <body>
-
 <div class="stage">
-  <div class="track" id="track"></div>
-  <div class="frame" id="frame"></div>
+<div id="track" class="track"></div>
+<div id="block" class="centerBlock"></div>
 </div>
-
 <script>
-(() => {
-
-const CUSTOMER_CODE="customer-pz1quf3nakoocijj";
-
-const VIDEO_IDS=[
+(()=>{
+const CUSTOMER="customer-pz1quf3nakoocijj";
+const IDS=[
 "1fd7b59118fcf10ef100d22f0053cecc",
 "f09759da687fe6aaeb7bd22f7f03bff5",
 "6d97c67e06de8e46261a04f5aa650101",
 "9a4cd544eedbf78b953fd6c7f006cb86",
-"ad4c9b16f0d4e990e15fe7314cdf29fd"
-];
-
-const link="https://p-silveira.com/collection/";
-
-const GAP=96;
-const SCALE_CENTER=1.18;
-const SCALE_OUT=.88;
-
+"ad4c9b16f0d4e990e15fe7314cdf29fd"];
+const GAP=40;
+const SIDE=.82;
+const LINK="https://p-silveira.com/collection/";
+const color=()=>`hsl(${Math.random()*360},90%,55%)`;
 const track=document.getElementById("track");
-const frame=document.getElementById("frame");
-
-const randomColor=()=>`hsl(${Math.random()*360},90%,55%)`;
-
-const slides=VIDEO_IDS.map(id=>{
-    const s=document.createElement("div");
-    s.className="slide";
-
-    const iframe=document.createElement("iframe");
-    iframe.src=`https://${CUSTOMER_CODE}.cloudflarestream.com/${id}/iframe?autoplay=true&muted=true&loop=true&controls=false&preload=auto`;
-    iframe.allow="autoplay; encrypted-media; picture-in-picture";
-    iframe.loading="lazy";
-
-    s.appendChild(iframe);
-    track.appendChild(s);
-
-    return s;
+const block=document.getElementById("block");
+const slides=IDS.map(id=>{
+ const el=document.createElement("div");
+ el.className="slide";
+ el.innerHTML=`<iframe src="https://${CUSTOMER}.cloudflarestream.com/${id}/iframe?autoplay=1&muted=1&loop=1&controls=0"></iframe>`;
+ track.appendChild(el);
+ return el;
 });
-
-const total=slides.length;
-let current=0;
-
-function slideWidth(){
-    return slides[0].getBoundingClientRect().width;
-}
-
+let current=0,total=slides.length;
 function render(){
-
-    const step=slideWidth()+GAP;
-
-    slides.forEach((slide,i)=>{
-
-        let diff=i-current;
-
-        if(diff>total/2) diff-=total;
-        if(diff<-total/2) diff+=total;
-
-        const x=diff*step;
-
-        let scale=SCALE_OUT;
-        let opacity=0;
-        let z=1;
-
-        if(diff===0){
-            scale=SCALE_CENTER;
-            opacity=1;
-            z=3;
-        }
-        else if(diff===-1 || diff===1){
-            opacity=.72;
-            scale=SCALE_OUT;
-            z=2;
-        }
-
-        slide.style.transform=
-            `translate(-50%,-50%) translateX(${x}px) scale(${scale})`;
-
-        slide.style.opacity=opacity;
-        slide.style.zIndex=z;
-
-    });
-
+ const step=420+GAP;
+ slides.forEach((s,i)=>{
+   let d=i-current;
+   if(d>total/2)d-=total;
+   if(d<-total/2)d+=total;
+   let op=0,z=1,sc=SIDE,y=0;
+   if(d===0){op=1;z=3;sc=1;y=0;}
+   else if(Math.abs(d)===1){op=.82;z=2;y=d<0?-8:8;}
+   s.style.opacity=op;
+   s.style.zIndex=z;
+   s.style.transform=`translate(-50%,-50%) translate(${d*step}px,${y}px) scale(${sc})`;
+ });
 }
-
-function next(){
-    current=(current+1)%total;
-    render();
-}
-
 render();
-
-window.addEventListener("resize",render);
-setInterval(next,4000);
-
-frame.addEventListener("mouseenter",()=>{
-    frame.style.borderColor=randomColor();
-});
-
-frame.addEventListener("mouseleave",()=>{
-    frame.style.borderColor="#fff";
-});
-
-frame.addEventListener("click",()=>{
-    window.location.href=link;
-});
-
+setInterval(()=>{
+ current=(current+1)%total;
+ block.style.backgroundColor=color();
+ render();
+},1000);
+block.onclick=()=>location.href=LINK;
 })();
 </script>
-
 </body>
 </html>

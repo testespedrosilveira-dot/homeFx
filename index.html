@@ -1,293 +1,288 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>HomeFX Trail Effect</title>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.3/p5.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <style>
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #fff;
-    }
+<title>Editorial Video</title>
 
-    #p5-holder {
-      width: 100vw;
-      height: 100vh;
-    }
+<style>
 
-    canvas {
-      display: block;
-    }
-  </style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html,
+body{
+
+width:100%;
+height:100%;
+
+overflow:hidden;
+
+background:#ffffff;
+
+font-family:Helvetica,Arial,sans-serif;
+
+}
+
+body{
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+--mx:50%;
+--my:50%;
+
+}
+
+/* ------------------------- */
+/* LIGHT FOLLOWING THE MOUSE */
+/* ------------------------- */
+
+.light{
+
+position:fixed;
+inset:0;
+
+pointer-events:none;
+
+background:
+radial-gradient(
+circle 600px at var(--mx) var(--my),
+rgba(255,255,255,.85),
+rgba(255,255,255,.2) 40%,
+rgba(255,255,255,0) 70%
+);
+
+mix-blend-mode:screen;
+
+z-index:5;
+
+}
+
+/* ------------------------- */
+/* VIGNETTE */
+/* ------------------------- */
+
+.vignette{
+
+position:fixed;
+inset:0;
+
+pointer-events:none;
+
+background:
+
+radial-gradient(
+
+circle,
+
+rgba(255,255,255,0) 45%,
+
+rgba(0,0,0,.045) 100%
+
+);
+
+z-index:6;
+
+}
+
+/* ------------------------- */
+/* DIGITAL NOISE */
+/* ------------------------- */
+
+canvas{
+
+position:fixed;
+inset:0;
+
+width:100%;
+height:100%;
+
+pointer-events:none;
+
+opacity:.025;
+
+mix-blend-mode:multiply;
+
+z-index:4;
+
+}
+
+/* ------------------------- */
+
+.sheet{
+
+position:relative;
+
+width:min(500px,72vw);
+
+aspect-ratio:.71;
+
+background:#fcfcfa;
+
+display:flex;
+justify-content:flex-start;
+align-items:center;
+flex-direction:column;
+
+padding-top:78px;
+
+box-shadow:
+
+0 2px 6px rgba(0,0,0,.04),
+0 40px 90px rgba(0,0,0,.05);
+
+transition:
+transform .12s linear;
+
+z-index:10;
+
+}
+
+/* ------------------------- */
+
+.video{
+
+width:175px;
+
+aspect-ratio:2 / 3;
+
+overflow:hidden;
+
+background:#ddd;
+
+box-shadow:
+
+0 10px 30px rgba(0,0,0,.08);
+
+transition:
+transform .12s linear;
+
+}
+
+.video iframe{
+
+width:100%;
+height:100%;
+
+border:none;
+
+}
+
+</style>
+
 </head>
 
 <body>
-  <div id="p5-holder"></div>
-
-  <script>
-    new p5((p) => {
-
-      const fileNames = [
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/BudMag_003_www.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS1_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0214671H_MOL_00286.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/2.webp",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/image-142ce47f-e8bb-459c-8643-c6135d7447c2.webp",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/ISO_spreads3334_2_PAGiso01_cam0024.webp",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/image-8cdc0c1e-272f-4031-9f80-099782f64760.webp",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/07.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/1%20(1).webp",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS5_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0216683H_MOL_00268.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/USEN_OUTERBANKS2_VIDEO_169AR_15S_MAC_OMAC_NA_WM_MOL0214672H_MOL_00235.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/Balma_maleta_mao-2.png",
-        "https://ik.imagekit.io/q3d43lw6h/new%20pics/MacBook-Pro_Great-Work-Happens-on-Mac-Dance-E-Bikes_15_STILL_AU-EN_DDMMYYYY_1080x1080_JPEG_00000.png"
-      ];
-
-      const tileSize = 60;
-      const maxTiles = window.innerWidth < 900 ? 180 : 333;
-      const mainRange = tileSize * 3 * 0.8;
-      const partialCount = window.innerWidth < 900 ? 10 : 23;
-      const fadeDuration = 500;
-
-      const imgs = [];
-      const imgsGray = [];
-      const tiles = [];
-
-      let loadedCount = 0;
-      let isReady = false;
-
-      const randomColor = () => [
-        p.random(255),
-        p.random(255),
-        p.random(255)
-      ];
-
-      const trailColors = [
-        [128, 128, 128],
-        [0, 0, 0],
-        randomColor()
-      ];
-
-      fileNames.forEach((url, index) => {
-        p.loadImage(
-          url,
-          (img) => {
-            imgs[index] = img;
-
-            const gray = img.get();
-            gray.filter(p.GRAY);
-
-            imgsGray[index] = gray;
-
-            loadedCount++;
-
-            if (loadedCount === fileNames.length && isReady) {
-              generateTiles();
-            }
-          },
-          () => {
-            loadedCount++;
-          }
-        );
-      });
-
-      function drawImageCover(img, w, h, alpha) {
-        const ratio = img.width / img.height;
-        const boxRatio = w / h;
-
-        let drawW = w;
-        let drawH = h;
-
-        if (ratio > boxRatio) {
-          drawW = ratio * h;
-        } else {
-          drawH = w / ratio;
-        }
-
-        p.tint(255, alpha);
-        p.image(img, -drawW * 0.5, -drawH * 0.5, drawW, drawH);
-        p.noTint();
-      }
-
-      function generateTiles() {
-        tiles.length = 0;
-
-        const w = p.width;
-        const h = p.height;
-
-        for (let i = 0; i < maxTiles; i++) {
-          const imgIndex = (Math.random() * imgs.length) | 0;
-
-          tiles.push({
-            x: Math.random() * (w - tileSize) + tileSize * 0.5,
-            y: Math.random() * (h - tileSize) + tileSize * 0.5,
-
-            imgIndex,
-            imgColor: imgs[imgIndex],
-            imgGray: imgsGray[imgIndex],
 
-            rot: 0,
-            scale: 1,
-            alpha: 0,
+<canvas id="noise"></canvas>
 
-            targetAlpha: 0,
-            targetScale: 1,
-            targetRot: 0,
+<div class="light"></div>
 
-            trailColor:
-              trailColors[(Math.random() * trailColors.length) | 0],
+<div class="vignette"></div>
 
-            shuffleTimer: Math.random() * 100,
-            shuffleInterval: 80 + Math.random() * 80
-          });
-        }
-      }
+<div class="sheet">
 
-      p.setup = () => {
-        p.pixelDensity(1);
+<div class="video">
 
-        p.createCanvas(
-          p.windowWidth,
-          p.windowHeight
-        ).parent("p5-holder");
+<iframe
 
-        setTimeout(() => {
-          p.resizeCanvas(
-            p.windowWidth,
-            p.windowHeight
-          );
+src="https://customer-pz1quf3nakoocijj.cloudflarestream.com/1fd7b59118fcf10ef100d22f0053cecc/iframe?autoplay=true&muted=true&loop=true&controls=false"
 
-          isReady = true;
+allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
 
-          if (loadedCount === fileNames.length) {
-            generateTiles();
-          }
-        }, 50);
-      };
+allowfullscreen>
 
-      p.windowResized = () => {
-        p.resizeCanvas(
-          p.windowWidth,
-          p.windowHeight
-        );
+</iframe>
 
-        if (loadedCount === fileNames.length && isReady) {
-          generateTiles();
-        }
-      };
+</div>
 
-      p.draw = () => {
-        if (!isReady || loadedCount < fileNames.length) return;
+</div>
 
-        p.background(255);
+<script>
 
-        const dt = Math.min(p.deltaTime, 32);
+const body=document.body;
+const sheet=document.querySelector(".sheet");
+const video=document.querySelector(".video");
 
-        const mouseX = p.mouseX;
-        const mouseY = p.mouseY;
+/* ------------------------- */
+/* PARALLAX */
+/* ------------------------- */
 
-        let partialCounter = 0;
+let tx=0;
+let ty=0;
 
-        for (let i = 0; i < tiles.length; i++) {
-          const t = tiles[i];
+window.addEventListener("mousemove",(e)=>{
 
-          const dx = mouseX - t.x;
-          const dy = mouseY - t.y;
+const x=e.clientX/window.innerWidth;
+const y=e.clientY/window.innerHeight;
 
-          const distSq = dx * dx + dy * dy;
+body.style.setProperty("--mx",`${x*100}%`);
+body.style.setProperty("--my",`${y*100}%`);
 
-          const isMain = distSq < mainRange * mainRange;
-          const isPartial =
-            !isMain && partialCounter < partialCount;
+tx=(x-.5)*18;
+ty=(y-.5)*18;
 
-          if (isPartial) {
-            partialCounter++;
-          }
+sheet.style.transform=
+`translate(${tx}px,${ty}px)`;
 
-          if (isMain) {
-            t.shuffleTimer += dt;
+video.style.transform=
+`translate(${tx*0.45}px,${ty*0.45}px)`;
 
-            if (t.shuffleTimer >= t.shuffleInterval) {
-              t.shuffleTimer = 0;
-              t.shuffleInterval = 80 + Math.random() * 80;
+});
 
-              let nextIndex = (Math.random() * imgs.length) | 0;
+/* ------------------------- */
+/* DIGITAL GRAIN */
+/* ------------------------- */
 
-              while (nextIndex === t.imgIndex) {
-                nextIndex = (Math.random() * imgs.length) | 0;
-              }
+const canvas=document.getElementById("noise");
+const ctx=canvas.getContext("2d");
 
-              t.imgIndex = nextIndex;
-              t.imgColor = imgs[nextIndex];
-              t.imgGray = imgsGray[nextIndex];
-            }
+function resize(){
 
-            t.targetScale = 1.75;
-            t.targetRot = p.random(-0.1, 0.1);
-            t.targetAlpha = 255;
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 
-          } else if (isPartial) {
+}
 
-            t.targetScale = 1.1;
-            t.targetRot = p.random(-0.05, 0.05);
-            t.targetAlpha = 50;
+window.addEventListener("resize",resize);
 
-          } else {
+resize();
 
-            t.targetScale = 1;
-            t.targetRot = 0;
-            t.targetAlpha = 0;
-          }
+function grain(){
 
-          const alphaLerp = dt / (fadeDuration * 0.7);
+const img=ctx.createImageData(canvas.width,canvas.height);
 
-          t.alpha += (t.targetAlpha - t.alpha) * alphaLerp;
-          t.scale += (t.targetScale - t.scale) * 0.08;
-          t.rot += (t.targetRot - t.rot) * 0.08;
+const data=img.data;
 
-          if (t.alpha < 0.1) continue;
+for(let i=0;i<data.length;i+=4){
 
-          p.push();
+const v=120+Math.random()*40;
 
-          p.translate(t.x, t.y);
-          p.rotate(t.rot);
-          p.scale(t.scale);
+data[i]=v;
+data[i+1]=v;
+data[i+2]=v;
+data[i+3]=10;
 
-          p.imageMode(p.CENTER);
+}
 
-          drawImageCover(
-            isMain ? t.imgColor : t.imgGray,
-            tileSize,
-            tileSize,
-            t.alpha
-          );
+ctx.putImageData(img,0,0);
 
-          const c = t.trailColor;
-          const isAccent = c[0] !== 128 && c[1] !== 128;
+}
 
-          p.noStroke();
+grain();
 
-          p.fill(
-            c[0],
-            c[1],
-            c[2],
-            t.alpha * (isAccent ? 0.8 : 0.2)
-          );
+setInterval(grain,800);
 
-          p.rectMode(p.CENTER);
-          p.rect(0, 0, tileSize, tileSize);
+</script>
 
-          p.pop();
-        }
-      };
-
-    });
-  </script>
 </body>
+
 </html>

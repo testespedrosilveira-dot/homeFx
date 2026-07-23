@@ -1,89 +1,23 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wide Carousel v4</title>
-<style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff;}
-.stage{position:relative;width:100vw;height:100vh;overflow:hidden;}
-.track{position:absolute;inset:0;}
-.slide{
-position:absolute;
-top:50%;
-left:50%;
-width:560px;
-aspect-ratio:9/16;
-transition:transform .45s cubic-bezier(.22,.61,.36,1),opacity .35s ease;
-will-change:transform,opacity;
-}
-.slide iframe{width:100%;height:100%;border:0;display:block;pointer-events:none;}
-.centerBlock{
-position:absolute;
-left:50%;
-top:50%;
-transform:translate(-50%,-50%);
-width:420px;
-aspect-ratio:9/16;
-background:#b3b3b3;
-border:12px solid #fff;
-box-sizing:content-box;
-transition:background-color .25s ease;
-z-index:10;
-cursor:pointer;
-}
-</style>
-</head>
-<body>
-<div class="stage">
-<div id="track" class="track"></div>
-<div id="block" class="centerBlock"></div>
-</div>
-<script>
-(()=>{
-const CUSTOMER="customer-pz1quf3nakoocijj";
-const IDS=[
-"1fd7b59118fcf10ef100d22f0053cecc",
-"f09759da687fe6aaeb7bd22f7f03bff5",
-"6d97c67e06de8e46261a04f5aa650101",
-"9a4cd544eedbf78b953fd6c7f006cb86",
-"ad4c9b16f0d4e990e15fe7314cdf29fd"];
-const GAP=40;
-const SIDE=.82;
-const LINK="https://p-silveira.com/collection/";
-const color=()=>`hsl(${Math.random()*360},90%,55%)`;
-const track=document.getElementById("track");
-const block=document.getElementById("block");
-const slides=IDS.map(id=>{
- const el=document.createElement("div");
- el.className="slide";
- el.innerHTML=`<iframe src="https://${CUSTOMER}.cloudflarestream.com/${id}/iframe?autoplay=1&muted=1&loop=1&controls=0"></iframe>`;
- track.appendChild(el);
- return el;
-});
-let current=0,total=slides.length;
-function render(){
- const step=420+GAP;
+<!doctype html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;height:100%;overflow:hidden;background:#fff;font-family:Arial,Helvetica,sans-serif}
+.stage{position:relative;width:100vw;height:100vh}
+.slide{position:absolute;left:50%;top:50%;width:500px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:430px;font-weight:400;color:#c3c3c3;transition:.45s cubic-bezier(.22,.61,.36,1),opacity .35s}
+.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:420px;aspect-ratio:1;background:#b3b3b3;border:12px solid #fff;z-index:10;transition:background .25s}
+</style></head><body><div class=stage><div id=t></div><div id=b class=center></div></div><script>
+const chars=["P","P","P","S","S"],SIDE=.52,GAP=70,STEP=570;
+const slides=chars.map(c=>{let d=document.createElement("div");d.className="slide";d.textContent=c;t.appendChild(d);return d});
+let cur=0;
+const col=()=>`hsl(${Math.random()*360},90%,55%)`;
+function r(){
  slides.forEach((s,i)=>{
-   let d=i-current;
-   if(d>total/2)d-=total;
-   if(d<-total/2)d+=total;
-   let op=0,z=1,sc=SIDE,y=0;
-   if(d===0){op=1;z=3;sc=1;y=0;}
-   else if(Math.abs(d)===1){op=.82;z=2;y=d<0?-8:8;}
-   s.style.opacity=op;
-   s.style.zIndex=z;
-   s.style.transform=`translate(-50%,-50%) translate(${d*step}px,${y}px) scale(${sc})`;
+ let diff=i-cur;if(diff>2.5)diff-=5;if(diff<-2.5)diff+=5;
+ let sc=SIDE,o=0,z=1;
+ if(diff===0){sc=1;o=1;z=3;}
+ else if(Math.abs(diff)===1){o=.82;z=2;}
+ s.style.opacity=o;s.style.zIndex=z;
+ s.style.transform=`translate(-50%,-50%) translate(${diff*STEP}px,0) scale(${sc})`;
  });
 }
-render();
-setInterval(()=>{
- current=(current+1)%total;
- block.style.backgroundColor=color();
- render();
-},1000);
-block.onclick=()=>location.href=LINK;
-})();
-</script>
-</body>
-</html>
+r();
+setInterval(()=>{cur=(cur+1)%5;b.style.background=col();r();},1000);
+</script></body></html>

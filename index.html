@@ -1,288 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<title>Editorial Video</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Editorial</title>
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-html,
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#fff}
 body{
-
-width:100%;
-height:100%;
-
-overflow:hidden;
-
-background:#ffffff;
-
+display:flex;justify-content:center;align-items:center;
 font-family:Helvetica,Arial,sans-serif;
-
+--mx:50%;--my:50%;--px:0px;--py:0px;
 }
-
-body{
-
-display:flex;
-justify-content:center;
-align-items:center;
-
---mx:50%;
---my:50%;
-
-}
-
-/* ------------------------- */
-/* LIGHT FOLLOWING THE MOUSE */
-/* ------------------------- */
-
-.light{
-
-position:fixed;
-inset:0;
-
-pointer-events:none;
-
+#noise,#fibers,.light,.vignette{position:fixed;inset:0;pointer-events:none}
+#noise{opacity:.05;mix-blend-mode:multiply}
+#fibers{
+opacity:.03;
 background:
-radial-gradient(
-circle 600px at var(--mx) var(--my),
-rgba(255,255,255,.85),
-rgba(255,255,255,.2) 40%,
-rgba(255,255,255,0) 70%
-);
-
-mix-blend-mode:screen;
-
-z-index:5;
-
-}
-
-/* ------------------------- */
-/* VIGNETTE */
-/* ------------------------- */
-
-.vignette{
-
-position:fixed;
-inset:0;
-
-pointer-events:none;
-
-background:
-
-radial-gradient(
-
-circle,
-
-rgba(255,255,255,0) 45%,
-
-rgba(0,0,0,.045) 100%
-
-);
-
-z-index:6;
-
-}
-
-/* ------------------------- */
-/* DIGITAL NOISE */
-/* ------------------------- */
-
-canvas{
-
-position:fixed;
-inset:0;
-
-width:100%;
-height:100%;
-
-pointer-events:none;
-
-opacity:.025;
-
+repeating-linear-gradient(90deg,
+rgba(0,0,0,.06) 0,
+rgba(0,0,0,.06) 1px,
+transparent 2px,
+transparent 5px);
 mix-blend-mode:multiply;
-
-z-index:4;
-
 }
-
-/* ------------------------- */
-
+.light{
+background:radial-gradient(circle 520px at var(--mx) var(--my),
+rgba(255,255,255,.95),
+rgba(255,255,255,.35) 45%,
+rgba(255,255,255,0) 80%);
+}
+.vignette{
+background:radial-gradient(circle,
+rgba(255,255,255,0) 45%,
+rgba(0,0,0,.06) 100%);
+}
 .sheet{
-
 position:relative;
-
-width:min(500px,72vw);
-
-aspect-ratio:.71;
-
+width:min(900px,82vw);
+height:min(1100px,90vh);
 background:#fcfcfa;
-
+box-shadow:
+0 0 1px rgba(0,0,0,.04),
+0 30px 80px rgba(0,0,0,.04);
 display:flex;
 justify-content:flex-start;
 align-items:center;
-flex-direction:column;
-
-padding-top:78px;
-
-box-shadow:
-
-0 2px 6px rgba(0,0,0,.04),
-0 40px 90px rgba(0,0,0,.05);
-
-transition:
-transform .12s linear;
-
-z-index:10;
-
+padding-top:8vh;
+transform:translate(var(--px),var(--py));
+transition:transform .08s linear;
 }
-
-/* ------------------------- */
-
+.sheet:before{
+content:"";
+position:absolute;inset:0;
+opacity:.06;
+background:
+linear-gradient(180deg,rgba(255,255,255,.8),rgba(0,0,0,.015));
+pointer-events:none;
+}
 .video{
-
-width:175px;
-
-aspect-ratio:2 / 3;
-
+width:min(340px,38vw);
+aspect-ratio:2/3;
+margin:auto;
+margin-top:0;
 overflow:hidden;
-
+box-shadow:0 12px 40px rgba(0,0,0,.08);
+transform:translate(calc(var(--px)*1.6),calc(var(--py)*1.6));
+transition:transform .08s linear;
 background:#ddd;
-
-box-shadow:
-
-0 10px 30px rgba(0,0,0,.08);
-
-transition:
-transform .12s linear;
-
+z-index:2;
 }
-
-.video iframe{
-
-width:100%;
-height:100%;
-
-border:none;
-
-}
-
+.video iframe{width:100%;height:100%;border:0}
 </style>
-
 </head>
-
 <body>
-
 <canvas id="noise"></canvas>
-
+<div id="fibers"></div>
 <div class="light"></div>
-
 <div class="vignette"></div>
 
 <div class="sheet">
-
 <div class="video">
-
-<iframe
-
-src="https://customer-pz1quf3nakoocijj.cloudflarestream.com/1fd7b59118fcf10ef100d22f0053cecc/iframe?autoplay=true&muted=true&loop=true&controls=false"
-
-allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-
-allowfullscreen>
-
-</iframe>
-
+<iframe src="https://customer-pz1quf3nakoocijj.cloudflarestream.com/1fd7b59118fcf10ef100d22f0053cecc/iframe?autoplay=true&muted=true&loop=true&controls=false&poster=false"
+allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
 </div>
-
 </div>
 
 <script>
-
-const body=document.body;
-const sheet=document.querySelector(".sheet");
-const video=document.querySelector(".video");
-
-/* ------------------------- */
-/* PARALLAX */
-/* ------------------------- */
-
-let tx=0;
-let ty=0;
-
-window.addEventListener("mousemove",(e)=>{
-
-const x=e.clientX/window.innerWidth;
-const y=e.clientY/window.innerHeight;
-
-body.style.setProperty("--mx",`${x*100}%`);
-body.style.setProperty("--my",`${y*100}%`);
-
-tx=(x-.5)*18;
-ty=(y-.5)*18;
-
-sheet.style.transform=
-`translate(${tx}px,${ty}px)`;
-
-video.style.transform=
-`translate(${tx*0.45}px,${ty*0.45}px)`;
-
+const b=document.body;
+addEventListener("mousemove",e=>{
+ let x=e.clientX/innerWidth;
+ let y=e.clientY/innerHeight;
+ b.style.setProperty("--mx",x*100+"%");
+ b.style.setProperty("--my",y*100+"%");
+ b.style.setProperty("--px",((x-.5)*16).toFixed(2)+"px");
+ b.style.setProperty("--py",((y-.5)*16).toFixed(2)+"px");
 });
 
-/* ------------------------- */
-/* DIGITAL GRAIN */
-/* ------------------------- */
-
-const canvas=document.getElementById("noise");
-const ctx=canvas.getContext("2d");
+const c=document.getElementById("noise");
+const ctx=c.getContext("2d");
 
 function resize(){
-
-canvas.width=window.innerWidth;
-canvas.height=window.innerHeight;
-
+ c.width=innerWidth/2;
+ c.height=innerHeight/2;
 }
-
-window.addEventListener("resize",resize);
-
 resize();
+addEventListener("resize",resize);
 
-function grain(){
-
-const img=ctx.createImageData(canvas.width,canvas.height);
-
-const data=img.data;
-
-for(let i=0;i<data.length;i+=4){
-
-const v=120+Math.random()*40;
-
-data[i]=v;
-data[i+1]=v;
-data[i+2]=v;
-data[i+3]=10;
-
+function render(){
+ let img=ctx.createImageData(c.width,c.height);
+ let d=img.data;
+ for(let i=0;i<d.length;i+=4){
+   let v=238+Math.random()*17;
+   d[i]=d[i+1]=d[i+2]=v;
+   d[i+3]=Math.random()*22;
+ }
+ ctx.putImageData(img,0,0);
 }
-
-ctx.putImageData(img,0,0);
-
-}
-
-grain();
-
-setInterval(grain,800);
-
+render();
+setInterval(render,1200);
 </script>
-
 </body>
-
 </html>

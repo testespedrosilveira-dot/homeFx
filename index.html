@@ -1,124 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Editorial</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#fff}
-body{
-display:flex;justify-content:center;align-items:center;
-font-family:Helvetica,Arial,sans-serif;
---mx:50%;--my:50%;--px:0px;--py:0px;
-}
-#noise,#fibers,.light,.vignette{position:fixed;inset:0;pointer-events:none}
-#noise{opacity:.05;mix-blend-mode:multiply}
-#fibers{
-opacity:.03;
-background:
-repeating-linear-gradient(90deg,
-rgba(0,0,0,.06) 0,
-rgba(0,0,0,.06) 1px,
-transparent 2px,
-transparent 5px);
-mix-blend-mode:multiply;
-}
-.light{
-background:radial-gradient(circle 520px at var(--mx) var(--my),
-rgba(255,255,255,.95),
-rgba(255,255,255,.35) 45%,
-rgba(255,255,255,0) 80%);
-}
-.vignette{
-background:radial-gradient(circle,
-rgba(255,255,255,0) 45%,
-rgba(0,0,0,.06) 100%);
-}
-.sheet{
-position:relative;
-width:min(900px,82vw);
-height:min(1100px,90vh);
-background:#fcfcfa;
-box-shadow:
-0 0 1px rgba(0,0,0,.04),
-0 30px 80px rgba(0,0,0,.04);
-display:flex;
-justify-content:flex-start;
-align-items:center;
-padding-top:8vh;
-transform:translate(var(--px),var(--py));
-transition:transform .08s linear;
-}
-.sheet:before{
-content:"";
-position:absolute;inset:0;
-opacity:.06;
-background:
-linear-gradient(180deg,rgba(255,255,255,.8),rgba(0,0,0,.015));
-pointer-events:none;
-}
-.video{
-width:min(340px,38vw);
-aspect-ratio:2/3;
-margin:auto;
-margin-top:0;
-overflow:hidden;
-box-shadow:0 12px 40px rgba(0,0,0,.08);
-transform:translate(calc(var(--px)*1.6),calc(var(--py)*1.6));
-transition:transform .08s linear;
-background:#ddd;
-z-index:2;
-}
-.video iframe{width:100%;height:100%;border:0}
-</style>
-</head>
-<body>
-<canvas id="noise"></canvas>
-<div id="fibers"></div>
-<div class="light"></div>
-<div class="vignette"></div>
 
-<div class="sheet">
-<div class="video">
-<iframe src="https://customer-pz1quf3nakoocijj.cloudflarestream.com/1fd7b59118fcf10ef100d22f0053cecc/iframe?autoplay=true&muted=true&loop=true&controls=false&poster=false"
-allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-</div>
+<title>Pedro Silveira</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+html,
+body{
+
+width:100%;
+height:100%;
+
+overflow:hidden;
+
+background:#fff;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-family:Helvetica,Arial,sans-serif;
+
+}
+
+#video{
+
+width:min(420px,34vw);
+aspect-ratio:9/16;
+
+transition:transform .15s ease-out;
+
+will-change:transform;
+
+}
+
+#video iframe{
+
+width:100%;
+height:100%;
+
+border:0;
+
+display:block;
+
+}
+
+@media (max-width:900px){
+
+#video{
+
+width:72vw;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="video">
+
+<iframe
+src="https://customer-pz1quf3nakoocijj.cloudflarestream.com/1fd7b59118fcf10ef100d22f0053cecc/iframe?autoplay=true&muted=true&loop=true&controls=false"
+allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+allowfullscreen>
+</iframe>
+
 </div>
 
 <script>
-const b=document.body;
-addEventListener("mousemove",e=>{
- let x=e.clientX/innerWidth;
- let y=e.clientY/innerHeight;
- b.style.setProperty("--mx",x*100+"%");
- b.style.setProperty("--my",y*100+"%");
- b.style.setProperty("--px",((x-.5)*16).toFixed(2)+"px");
- b.style.setProperty("--py",((y-.5)*16).toFixed(2)+"px");
+
+const video=document.getElementById("video");
+
+let targetX=0;
+let targetY=0;
+
+let currentX=0;
+let currentY=0;
+
+window.addEventListener("mousemove",(e)=>{
+
+const x=(e.clientX/window.innerWidth-.5);
+const y=(e.clientY/window.innerHeight-.5);
+
+targetX=x*18;
+targetY=y*18;
+
 });
 
-const c=document.getElementById("noise");
-const ctx=c.getContext("2d");
+function animate(){
 
-function resize(){
- c.width=innerWidth/2;
- c.height=innerHeight/2;
-}
-resize();
-addEventListener("resize",resize);
+currentX+=(targetX-currentX)*0.08;
+currentY+=(targetY-currentY)*0.08;
 
-function render(){
- let img=ctx.createImageData(c.width,c.height);
- let d=img.data;
- for(let i=0;i<d.length;i+=4){
-   let v=238+Math.random()*17;
-   d[i]=d[i+1]=d[i+2]=v;
-   d[i+3]=Math.random()*22;
- }
- ctx.putImageData(img,0,0);
+video.style.transform=
+`translate(${currentX}px,${currentY}px)`;
+
+requestAnimationFrame(animate);
+
 }
-render();
-setInterval(render,1200);
+
+animate();
+
 </script>
+
 </body>
+
 </html>
